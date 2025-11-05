@@ -1,0 +1,115 @@
+Chuẩn hóa kiến thức Chim Cút
+I. Xác định xu hướng giá (Trend)
+1. Ngắn hạn
+Trend tăng mạnh:
+Giá > MA5 và MA10
+ADX5 > 30 (trên 50 là rất mạnh)
+Nến xanh liên tục, khối lượng tăng > 100% so với trung bình 20 phiên
+Trend yếu / đảo chiều giảm:
+Giá < MA5 và MA10 hoặc cắt xuống MA20
+ADX5 < 20 hoặc đang giảm
+Nến doji/giảm kèm khối lượng lớn
+2. Trung hạn
+Trend tăng vừa:
+Giá > MA20 và MA50
+MA5-20 cắt lên MA50
+ADX20 từ 20–30, dốc lên
+Trend giảm trung hạn:
+Giá < MA20 và MA50, MA20 cắt xuống MA50
+ADX20 < 20 hoặc dốc xuống
+3. Dài hạn
+Uptrend:
+MA50 > MA100 > MA200, giá nằm trên các MA
+MA200 dốc lên, khối lượng trung bình tăng dần
+Downtrend:
+Giá < MA100 và MA200, hai MA dài dốc xuống
+ADX dài hạn < 20
+II. Phân tích khối lượng (Volume)
+Trạng thái Đặc điểm Ý nghĩa
+Giá ↑ – Vol ↑ Volume > trung bình 20 ngày Xu hướng tăng được xác nhận
+Giá ↑ – Vol ↓ Volume < VMA20 Tăng yếu, dễ đảo chiều
+Giá ↓ – Vol ↓ Volume giảm dần Giai đoạn tích lũy / tiết cung
+Giá ↓ – Vol ↑ Volume > 150% trung bình 20 ngày Phá vỡ hỗ trợ, bán mạnh
+Vol > 200% TB Nến dài, breakout/bulltrap Kiểm tra break thật hay bẫy
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+1
+III. Vùng cung – cầu
+Vùng cầu (hỗ trợ): vùng bật giá ≥2 lần, trùng VAP thấp hoặc MA20/MA50.
+Vùng cung (kháng cự): vùng bị từ chối ≥2 lần, trùng đỉnh cũ hoặc Fibo 23.6–38.2%.
+Giá test kháng cự vol thấp → dễ vượt lên Giá test hỗ trợ vol thấp → dễ giữ nền
+IV. Breakout và bẫy giá
+Dạng Dấu hiệu Hành động
+Break thật Nến CE/xanh dài, vol ≥150% TB, đóng cửa > kháng cự MUA
+Bulltrap Nến tăng vol thấp, đóng < kháng cự KHÔNG MUA
+Beartrap Nến đỏ mạnh vol thấp, hồi nhanh MUA GOM
+V. Momentum (Động lượng)
+ADX:
+<20: Không xu hướng
+20–30: Xu hướng yếu
+30–50: Xu hướng mạnh
+50: Xu hướng rất mạnh
+CMF:
+0: Dòng tiền vào
+<0: Dòng tiền ra
+CMF dương + ADX tăng → tín hiệu mua mạnh
+VI. Fibonacci
+Dãy Fibo: 38.2%, 50%, 61.8%, 100%, 161.8%
+Mục tiêu: Break thành công → Fibo 0% hoặc 23.6%
+Cắt lỗ: Dưới Fibo 61.8% hoặc nền hỗ trợ gần nhất 1–2%
+VII. Quản trị lệnh và vốn
+Phân bổ lệnh:
+T0: 50% vốn
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+• 
+2
+T2: 30% (margin/gia tăng khi xác nhận vol)
+T5: 20% (gia tăng khi vượt kháng cự)
+Cắt lỗ: 3–5% dưới hỗ trợ
+Risk:Reward: tối thiểu 1:2
+VIII. Quy tắc tổng hợp
+Điều kiện Khuyến nghị
+Giá > MA5/10, ADX > 30, vol ↑ MUA / TĂNG TỶ TRỌNG
+Giá test kháng cự, nến doji, vol ↓ QUAN SÁT
+Giá < MA20, vol cao CẢNH BÁO GIẢM
+Giá > MA20 nhưng < MA50 MUA GOM NỀN
+Giá break MA50 + vol mạnh MUA BREAKOUT
+Giá mất MA50/100, ADX ↓ GIẢM TỶ TRỌNG / CẮT LỖ
+• 
+• 
+• 
+• 
+3
