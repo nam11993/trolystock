@@ -42,7 +42,7 @@ def save_config(config):
         return False
 
 # Title
-st.title("📈 Tra cứu Chứng khoán Việt Nam")
+st.title("📈 Trợ lý AI stock")
 st.markdown("---")
 
 # Load cấu hình đã lưu
@@ -163,12 +163,12 @@ if submit_button:
                     latest = price_data.iloc[-1]
                     
                     with col1:
-                        st.metric("Giá đóng cửa", f"{latest['close']:,.0f}", 
-                                 f"{latest['close'] - latest['open']:,.0f}")
+                        st.metric("Giá đóng cửa", f"{latest['close']:,.2f}", 
+                                 f"{latest['close'] - latest['open']:,.2f}")
                     with col2:
-                        st.metric("Cao nhất", f"{latest['high']:,.0f}")
+                        st.metric("Cao nhất", f"{latest['high']:,.2f}")
                     with col3:
-                        st.metric("Thấp nhất", f"{latest['low']:,.0f}")
+                        st.metric("Thấp nhất", f"{latest['low']:,.2f}")
                     with col4:
                         st.metric("Khối lượng", f"{latest['volume']:,.0f}")
                     with col5:
@@ -447,7 +447,7 @@ Hãy phân tích theo ĐÚNG phương pháp Chim Cút đã học!"""
                     st.markdown("---")
                     st.markdown("**💡 Câu hỏi gợi ý:**")
                     col1, col2 = st.columns(2)
-                    with col1:
+                    with col1:  
                         if st.button(f"📊 Phân tích kỹ thuật {symbol}", use_container_width=True):
                             st.rerun()
                         if st.button(f"💰 Đánh giá định giá {symbol}", use_container_width=True):
@@ -609,22 +609,22 @@ if st.session_state.current_symbol and st.session_state.openai_api_key:
                             recent_30 = history_365d.tail(30)
                             history_str = "30 NGÀY GẦN NHẤT:\n" + "\n".join([
                                 f"  {idx.strftime('%Y-%m-%d') if hasattr(idx, 'strftime') else idx}: "
-                                f"Giá {row['close']:,.0f} VND, KL {row['volume']:,.0f}"
+                                f"Giá {row['close']:,.2f} VND, KL {row['volume']:,.0f}"
                                 for idx, row in recent_30.iterrows()
                             ])
                             
                             # Thêm thống kê 365 ngày
                             history_str += f"\n\nTHỐNG KÊ 365 NGÀY (1 NĂM):\n"
-                            history_str += f"  - Giá cao nhất: {history_365d['close'].max():,.0f} VND\n"
-                            history_str += f"  - Giá thấp nhất: {history_365d['close'].min():,.0f} VND\n"
-                            history_str += f"  - Giá trung bình: {history_365d['close'].mean():,.0f} VND\n"
+                            history_str += f"  - Giá cao nhất: {history_365d['close'].max():,.2f} VND\n"
+                            history_str += f"  - Giá thấp nhất: {history_365d['close'].min():,.2f} VND\n"
+                            history_str += f"  - Giá trung bình: {history_365d['close'].mean():,.2f} VND\n"
                             history_str += f"  - Biên độ dao động: {((history_365d['close'].max() - history_365d['close'].min()) / history_365d['close'].min() * 100):.2f}%\n"
                             history_str += f"  - KL trung bình: {history_365d['volume'].mean():,.0f}\n"
                             history_str += f"  - Tổng số ngày giao dịch: {len(history_365d)}"
                         else:
                             history_str = "\n".join([
                                 f"  {idx.strftime('%Y-%m-%d') if hasattr(idx, 'strftime') else idx}: "
-                                f"Giá {row['close']:,.0f} VND, KL {row['volume']:,.0f}"
+                                f"Giá {row['close']:,.2f} VND, KL {row['volume']:,.0f}"
                                 for idx, row in history_365d.iterrows()
                             ])
                         
@@ -632,11 +632,11 @@ if st.session_state.current_symbol and st.session_state.openai_api_key:
 📊 DỮ LIỆU CỔ PHIẾU {symbol} (Cập nhật: {latest.name.strftime('%Y-%m-%d') if hasattr(latest.name, 'strftime') else 'N/A'}):
 
 GIÁ HIỆN TẠI:
-- Giá đóng cửa: {latest['close']:,.0f} VND
-- Thay đổi: {change:,.0f} VND ({change_pct:+.2f}%)
-- Giá mở cửa: {latest['open']:,.0f} VND
-- Cao nhất trong ngày: {latest['high']:,.0f} VND
-- Thấp nhất trong ngày: {latest['low']:,.0f} VND
+- Giá đóng cửa: {latest['close']:,.2f} VND
+- Thay đổi: {change:,.2f} VND ({change_pct:+.2f}%)
+- Giá mở cửa: {latest['open']:,.2f} VND
+- Cao nhất trong ngày: {latest['high']:,.2f} VND
+- Thấp nhất trong ngày: {latest['low']:,.2f} VND
 
 KHỐI LƯỢNG:
 - KL hôm nay: {latest['volume']:,.0f}
@@ -644,19 +644,19 @@ KHỐI LƯỢNG:
 - Tỷ lệ KL/TB: {volume_ratio:.1f}% {'(CAO)' if volume_ratio > 150 else '(THẤP)' if volume_ratio < 50 else '(BÌNH THƯỜNG)'}
 
 ĐƯỜNG TRUNG BÌNH (MA):
-- MA5: {ma5:,.0f} VND → Giá {'TRÊN' if latest['close'] > ma5 else 'DƯỚI'} MA5 ({(latest['close']/ma5*100-100):+.2f}%)
-- MA10: {ma10:,.0f} VND → Giá {'TRÊN' if latest['close'] > ma10 else 'DƯỚI'} MA10 ({(latest['close']/ma10*100-100):+.2f}%)
-- MA20: {ma20:,.0f} VND → Giá {'TRÊN' if latest['close'] > ma20 else 'DƯỚI'} MA20 ({(latest['close']/ma20*100-100):+.2f}%)
-- MA50: {ma50:,.0f} VND → Giá {'TRÊN' if latest['close'] > ma50 else 'DƯỚI'} MA50 ({(latest['close']/ma50*100-100):+.2f}%)
-- MA100: {f"{ma100:,.0f} VND" if ma100 else 'N/A (cần >100 ngày dữ liệu)'}
-- MA200: {f"{ma200:,.0f} VND" if ma200 else 'N/A (cần >200 ngày dữ liệu)'}
+- MA5: {ma5:,.2f} VND → Giá {'TRÊN' if latest['close'] > ma5 else 'DƯỚI'} MA5 ({(latest['close']/ma5*100-100):+.2f}%)
+- MA10: {ma10:,.2f} VND → Giá {'TRÊN' if latest['close'] > ma10 else 'DƯỚI'} MA10 ({(latest['close']/ma10*100-100):+.2f}%)
+- MA20: {ma20:,.2f} VND → Giá {'TRÊN' if latest['close'] > ma20 else 'DƯỚI'} MA20 ({(latest['close']/ma20*100-100):+.2f}%)
+- MA50: {ma50:,.2f} VND → Giá {'TRÊN' if latest['close'] > ma50 else 'DƯỚI'} MA50 ({(latest['close']/ma50*100-100):+.2f}%)
+- MA100: {f"{ma100:,.2f} VND" if ma100 else 'N/A (cần >100 ngày dữ liệu)'}
+- MA200: {f"{ma200:,.2f} VND" if ma200 else 'N/A (cần >200 ngày dữ liệu)'}
 
 CHỈ SỐ XU HƯỚNG:
 - ADX(14): {f"{adx:.1f}" if adx else 'N/A'} {('(XU HƯỚNG MẠNH)' if adx > 30 else '(XU HƯỚNG YẾU)' if adx < 20 else '(XU HƯỚNG VỪA)') if adx else ''}
 
 XU HƯỚNG 30 NGÀY GẦN ĐÂY:
-- Giá cao nhất: {recent_data['high'].max():,.0f} VND
-- Giá thấp nhất: {recent_data['low'].min():,.0f} VND
+- Giá cao nhất: {recent_data['high'].max():,.2f} VND
+- Giá thấp nhất: {recent_data['low'].min():,.2f} VND
 - Biên độ dao động: {((recent_data['high'].max() - recent_data['low'].min()) / recent_data['low'].min() * 100):.2f}%
 
 LỊCH SỬ GIÁ & KHỐI LƯỢNG:
