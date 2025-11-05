@@ -23,19 +23,24 @@ st.markdown("---")
 # Sidebar
 st.sidebar.header("⚙️ Cài đặt")
 
-# Input mã chứng khoán
-symbol = st.sidebar.text_input("Nhập mã chứng khoán", value="VNM").upper()
+# Form để có thể nhấn Enter
+with st.sidebar.form(key="search_form"):
+    # Input mã chứng khoán
+    symbol = st.text_input("Nhập mã chứng khoán", value="VNM").upper()
 
-# Chọn nguồn dữ liệu
-source = st.sidebar.selectbox("Nguồn dữ liệu", ["VCI", "TCBS", "MSN"])
+    # Chọn nguồn dữ liệu (mặc định TCBS)
+    source = st.selectbox("Nguồn dữ liệu", ["TCBS", "VCI", "MSN"])
 
-# Chọn khoảng thời gian
-days = st.sidebar.slider("Số ngày lịch sử", 30, 365, 90)
-end_date = datetime.now()
-start_date = end_date - timedelta(days=days)
+    # Mặc định 365 ngày lịch sử (1 năm)
+    days = 365
+    end_date = datetime.now()
+    start_date = end_date - timedelta(days=days)
 
-# Button để lấy dữ liệu
-if st.sidebar.button("🔍 Tra cứu", type="primary"):
+    # Button để lấy dữ liệu
+    submit_button = st.form_submit_button("🔍 Tra cứu", type="primary", use_container_width=True)
+
+# Xử lý khi nhấn button hoặc Enter
+if submit_button:
     try:
         with st.spinner(f"Đang tải dữ liệu {symbol}..."):
             # Khởi tạo
@@ -176,25 +181,6 @@ if st.sidebar.button("🔍 Tra cứu", type="primary"):
     except Exception as e:
         st.error(f"❌ Lỗi: {str(e)}")
         st.info("Vui lòng kiểm tra lại mã chứng khoán hoặc kết nối internet.")
-
-# Sidebar - Danh sách mã phổ biến
-st.sidebar.markdown("---")
-st.sidebar.markdown("### 📋 Mã phổ biến")
-popular_stocks = {
-    "VNM": "Vinamilk",
-    "VCB": "Vietcombank",
-    "FPT": "FPT Corp",
-    "HPG": "Hòa Phát",
-    "VHM": "Vinhomes",
-    "VIC": "Vingroup",
-    "MWG": "Mobile World",
-    "VRE": "Vincom Retail",
-    "GAS": "PV Gas",
-    "MSN": "Masan Group"
-}
-
-for code, name in popular_stocks.items():
-    st.sidebar.markdown(f"**{code}** - {name}")
 
 # Footer
 st.sidebar.markdown("---")
