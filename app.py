@@ -11,6 +11,8 @@ import plotly.graph_objects as go
 from openai import OpenAI
 import json
 import os
+import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 # Cấu hình trang
 st.set_page_config(
@@ -60,6 +62,74 @@ def load_ptkt_examples():
             st.warning(f"Không thể đọc file {file_path}: {str(e)}")
     
     return "\n\n---\n\n".join(examples) if examples else ""
+
+# Hàm lấy dữ liệu 1 mã cổ phiếu
+def fetch_stock_data(symbol, industry):
+    """Lấy dữ liệu cho 1 mã cổ phiếu"""
+    try:
+        stock = Vnstock().stock(symbol=symbol, source="TCBS")
+        price_data = stock.quote.history(
+            start=(datetime.now() - timedelta(days=5)).strftime('%Y-%m-%d'),
+            end=datetime.now().strftime('%Y-%m-%d'),
+            interval='1D'
+        )
+        
+        if not price_data.empty and len(price_data) > 0:
+            latest = price_data.iloc[-1]
+            close_price = float(latest['close'])
+            open_price = float(latest['open'])
+            change = close_price - open_price
+            change_pct = (change / open_price * 100) if open_price > 0 else 0
+            
+            return {
+                'Ngành': industry,
+                'Mã': symbol,
+                'Giá': close_price,
+                '+/-': change,
+                '%': change_pct
+            }
+    except Exception as e:
+        return None
+    return None
+
+# Cache dữ liệu thị trường trong 3 phút
+@st.cache_data(ttl=180)  # Cache 3 phút = 180 giây
+def fetch_market_data_cached(industry_groups_tuple):
+    """
+    Lấy dữ liệu thị trường với cache, parallel processing và smart delay
+    """
+    industry_groups = dict(industry_groups_tuple)
+    all_data = []
+    
+    # Tạo danh sách tất cả các (symbol, industry) cần lấy
+    tasks = []
+    for industry, symbols in industry_groups.items():
+        for symbol in symbols:
+            tasks.append((symbol, industry))
+    
+    # Chia thành các batch để tránh quá tải (15 mã/batch để tối ưu với 120 mã)
+    batch_size = 15
+    batches = [tasks[i:i+batch_size] for i in range(0, len(tasks), batch_size)]
+    
+    # Xử lý từng batch với parallel processing
+    for batch_idx, batch in enumerate(batches):
+        # Parallel fetch cho mỗi batch với 8 workers để xử lý nhanh hơn
+        with ThreadPoolExecutor(max_workers=8) as executor:
+            future_to_symbol = {
+                executor.submit(fetch_stock_data, symbol, industry): symbol 
+                for symbol, industry in batch
+            }
+            
+            for future in as_completed(future_to_symbol):
+                result = future.result()
+                if result:
+                    all_data.append(result)
+        
+        # Delay giữa các batch để tránh rate limit (trừ batch cuối)
+        if batch_idx < len(batches) - 1:
+            time.sleep(0.4)  # Giảm delay xuống 0.4s với batch lớn hơn
+    
+    return all_data
 
 # Title
 st.title("📈 Trợ lý AI stock")
@@ -177,51 +247,32 @@ with st.sidebar.form(key="search_form"):
 
 # ==================== BẢNG GIÁ THỊ TRƯỜNG ====================
 if hasattr(st.session_state, 'market_view_mode') and st.session_state.market_view_mode:
-    st.header("📊 Bảng giá thị trường - 50 mã phổ biến")
-    st.info("📈 Dữ liệu cập nhật theo thời gian thực từ TCBS")
+    st.header("📊 Bảng giá thị trường - 120 mã phổ biến")
+    st.info("📈 Dữ liệu cập nhật theo thời gian thực từ TCBS - Ưu tiên các mã có thanh khoản tốt")
     
-    # Định nghĩa các nhóm ngành với 50 mã phổ biến nhất
+    # Định nghĩa các nhóm ngành với các mã phổ biến và có thanh khoản tốt (tối đa 20 mã/ngành)
     industry_groups = {
         "VN30": ["VCB", "VHM", "VIC", "HPG", "MSN", "VNM", "FPT", "MWG", "VRE", "PLX",
                  "GAS", "TCB", "BID", "CTG", "VPB", "MBB", "POW", "SAB", "SSI", "HDB"],
-        "NGÂN HÀNG": ["ACB", "STB", "TPB", "VIB", "LPB"],
-        "CHỨNG KHOÁN": ["VND", "HCM", "VCI", "FTS", "BSI"],
-        "BẤT ĐỘNG SẢN": ["NVL", "DXG", "KDH", "PDR", "HDG"],
-        "CÔNG NGHIỆP": ["HSG", "NKG", "DGC", "DCM", "GVR"],
-        "NĂNG LƯỢNG": ["PVS", "PVD", "BSR", "PVC", "PVT"],
+        "NGÂN HÀNG": ["ACB", "STB", "TPB", "VIB", "LPB", "EIB", "SHB", "VBB", "MSB", "OCB",
+                      "TCB", "MBB", "VCB", "BID", "CTG", "VPB", "HDB", "TPB", "SGB", "BAB"],
+        "CHỨNG KHOÁN": ["VND", "HCM", "VCI", "FTS", "BSI", "SSI", "VIX", "AGR", "SHS", "CTS",
+                        "MBS", "BVS", "APG", "IVS", "TVS", "ORS", "VDS", "AAS", "PSI", "EVS"],
+        "BẤT ĐỘNG SẢN": ["NVL", "DXG", "KDH", "PDR", "HDG", "DIG", "NLG", "KBC", "VHM", "VRE",
+                         "TCH", "CEO", "HDC", "LDG", "DXS", "IDC", "NBB", "SCR", "SZC", "ITA"],
+        "CÔNG NGHIỆP": ["HSG", "NKG", "DGC", "DCM", "GVR", "HPG", "POM", "TNG", "VGC", "VHC",
+                        "PLC", "AAA", "PHR", "SBT", "HT1", "NTP", "DTL", "CSV", "TRA", "VCS"],
+        "NĂNG LƯỢNG": ["PVS", "PVD", "BSR", "PVC", "PVT", "GAS", "PLX", "POW", "NT2", "PVG",
+                       "PVB", "PVX", "PGD", "PGS", "PC1", "GEG", "SFC", "REE", "VSH", "QTP"],
     }
     
     # Tạo container cho bảng
-    with st.spinner("⏳ Đang tải 50 mã từ thị trường..."):
-        all_data = []
+    with st.spinner("⏳ Đang tải 120 mã từ thị trường... (Cache 3 phút)"):
+        # Convert dict to tuple for caching
+        industry_groups_tuple = tuple((k, tuple(v)) for k, v in industry_groups.items())
         
-        for industry, symbols in industry_groups.items():
-            for symbol in symbols:
-                try:
-                    # Lấy dữ liệu giá
-                    stock = Vnstock().stock(symbol=symbol, source="TCBS")
-                    price_data = stock.quote.history(
-                        start=(datetime.now() - timedelta(days=5)).strftime('%Y-%m-%d'),
-                        end=datetime.now().strftime('%Y-%m-%d'),
-                        interval='1D'
-                    )
-                    
-                    if not price_data.empty and len(price_data) > 0:
-                        latest = price_data.iloc[-1]
-                        close_price = float(latest['close'])
-                        open_price = float(latest['open'])
-                        change = close_price - open_price
-                        change_pct = (change / open_price * 100) if open_price > 0 else 0
-                        
-                        all_data.append({
-                            'Ngành': industry,
-                            'Mã': symbol,
-                            'Giá': close_price,
-                            '+/-': change,
-                            '%': change_pct
-                        })
-                except Exception as e:
-                    continue
+        # Gọi hàm cache để lấy dữ liệu
+        all_data = fetch_market_data_cached(industry_groups_tuple)
         
         # Hiển thị theo CỘT - mỗi ngành một cột
         if all_data:
@@ -254,13 +305,13 @@ if hasattr(st.session_state, 'market_view_mode') and st.session_state.market_vie
                             # Chọn màu dựa trên % thay đổi
                             if change_pct > 0:
                                 color = "green"
-                                bg_color = "#d4edda"
+                                bg_color = "#c3f0ca"  # Xanh lá nhạt
                             elif change_pct < 0:
-                                color = "red"
-                                bg_color = "#f8d7da"
+                                color = "darkred"
+                                bg_color = "#ffcdd2"  # Đỏ nhạt
                             else:
                                 color = "black"
-                                bg_color = "#ffffff"
+                                bg_color = "#fff9c4"  # Vàng
                             
                             # Hiển thị mã với màu nền
                             st.markdown(
