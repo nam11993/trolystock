@@ -112,13 +112,13 @@ def fetch_market_data_cached(industry_groups_tuple):
         for symbol in symbols:
             tasks.append((symbol, industry))
     
-    # Chia thành các batch rất nhỏ để tránh rate limit nghiêm ngặt từ TCBS
-    batch_size = 5  # Giảm xuống 5 mã/batch để an toàn tối đa
+    # Chia thành các batch nhỏ để tránh rate limit từ TCBS (60 mã với batch 6)
+    batch_size = 6  # 6 mã/batch = 10 batch tổng cộng
     batches = [tasks[i:i+batch_size] for i in range(0, len(tasks), batch_size)]
     
     # Xử lý từng batch với parallel processing
     for batch_idx, batch in enumerate(batches):
-        # Parallel fetch cho mỗi batch với 3 workers (giảm từ 5 để rất an toàn)
+        # Parallel fetch cho mỗi batch với 3 workers để an toàn
         with ThreadPoolExecutor(max_workers=3) as executor:
             future_to_symbol = {
                 executor.submit(fetch_stock_data, symbol, industry): symbol 
@@ -130,9 +130,9 @@ def fetch_market_data_cached(industry_groups_tuple):
                 if result:
                     all_data.append(result)
         
-        # Tăng delay rất lớn giữa các batch để hoàn toàn tránh bị TCBS chặn
+        # Delay 1.5s giữa các batch (cân bằng giữa tốc độ và tránh rate limit)
         if batch_idx < len(batches) - 1:
-            time.sleep(2.0)  # Tăng delay lên 2 giây để an toàn tối đa
+            time.sleep(1.5)
     
     return all_data
 
@@ -252,27 +252,21 @@ with st.sidebar.form(key="search_form"):
 
 # ==================== BẢNG GIÁ THỊ TRƯỜNG ====================
 if hasattr(st.session_state, 'market_view_mode') and st.session_state.market_view_mode:
-    st.header("📊 Bảng giá thị trường - 120 mã phổ biến")
+    st.header("📊 Bảng giá thị trường - 60 mã phổ biến")
     st.info("📈 Dữ liệu cache 5 phút - Tối ưu để tránh rate limit từ TCBS")
     
-    # Định nghĩa các nhóm ngành với các mã phổ biến và có thanh khoản tốt (tối đa 20 mã/ngành)
+    # Định nghĩa các nhóm ngành với các mã phổ biến và có thanh khoản tốt (10 mã/ngành để tránh rate limit)
     industry_groups = {
-        "VN30": ["VCB", "VHM", "VIC", "HPG", "MSN", "VNM", "FPT", "MWG", "VRE", "PLX",
-                 "GAS", "TCB", "BID", "CTG", "VPB", "MBB", "POW", "SAB", "SSI", "HDB"],
-        "NGÂN HÀNG": ["ACB", "STB", "TPB", "VIB", "LPB", "EIB", "SHB", "VBB", "MSB", "OCB",
-                      "TCB", "MBB", "VCB", "BID", "CTG", "VPB", "HDB", "TPB", "SGB", "BAB"],
-        "CHỨNG KHOÁN": ["VND", "HCM", "VCI", "FTS", "BSI", "SSI", "VIX", "AGR", "SHS", "CTS",
-                        "MBS", "BVS", "APG", "IVS", "TVS", "ORS", "VDS", "AAS", "PSI", "EVS"],
-        "BẤT ĐỘNG SẢN": ["NVL", "DXG", "KDH", "PDR", "HDG", "DIG", "NLG", "KBC", "VHM", "VRE",
-                         "TCH", "CEO", "HDC", "LDG", "DXS", "IDC", "NBB", "SCR", "SZC", "ITA"],
-        "CÔNG NGHIỆP": ["HSG", "NKG", "DGC", "DCM", "GVR", "HPG", "POM", "TNG", "VGC", "VHC",
-                        "PLC", "AAA", "PHR", "SBT", "HT1", "NTP", "DTL", "CSV", "TRA", "VCS"],
-        "NĂNG LƯỢNG": ["PVS", "PVD", "BSR", "PVC", "PVT", "GAS", "PLX", "POW", "NT2", "PVG",
-                       "PVB", "PVX", "PGD", "PGS", "PC1", "GEG", "SFC", "REE", "VSH", "QTP"],
+        "VN30": ["VCB", "VHM", "VIC", "HPG", "MSN", "VNM", "FPT", "MWG", "VRE", "PLX"],
+        "NGÂN HÀNG": ["ACB", "STB", "TPB", "VIB", "LPB", "EIB", "SHB", "TCB", "MBB", "HDB"],
+        "CHỨNG KHOÁN": ["VND", "HCM", "VCI", "FTS", "BSI", "SSI", "VIX", "AGR", "SHS", "CTS"],
+        "BẤT ĐỘNG SẢN": ["NVL", "DXG", "KDH", "PDR", "HDG", "DIG", "NLG", "KBC", "VHM", "VRE"],
+        "CÔNG NGHIỆP": ["HSG", "NKG", "DGC", "DCM", "GVR", "HPG", "POM", "TNG", "VGC", "VHC"],
+        "NĂNG LƯỢNG": ["PVS", "PVD", "BSR", "PVC", "PVT", "GAS", "PLX", "POW", "NT2", "PVG"],
     }
     
     # Tạo container cho bảng
-    with st.spinner("⏳ Đang tải 120 mã từ thị trường... Vui lòng chờ ~50-60 giây (Cache 5 phút)"):
+    with st.spinner("⏳ Đang tải 60 mã từ thị trường... Vui lòng chờ ~25-30 giây (Cache 5 phút)"):
         # Convert dict to tuple for caching
         industry_groups_tuple = tuple((k, tuple(v)) for k, v in industry_groups.items())
         
