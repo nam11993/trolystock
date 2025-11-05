@@ -26,6 +26,9 @@ wheels/
 # Streamlit
 .streamlit/
 
+# Config files with API keys
+config.json
+
 # IDEs
 .vscode/
 .idea/

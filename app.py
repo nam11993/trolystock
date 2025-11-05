@@ -9,6 +9,8 @@ from vnstock import Vnstock
 from datetime import datetime, timedelta
 import plotly.graph_objects as go
 from openai import OpenAI
+import json
+import os
 
 # Cấu hình trang
 st.set_page_config(
@@ -17,15 +19,41 @@ st.set_page_config(
     layout="wide"
 )
 
+# File lưu cấu hình
+CONFIG_FILE = "config.json"
+
+def load_config():
+    """Đọc cấu hình từ file"""
+    if os.path.exists(CONFIG_FILE):
+        try:
+            with open(CONFIG_FILE, 'r') as f:
+                return json.load(f)
+        except:
+            return {}
+    return {}
+
+def save_config(config):
+    """Lưu cấu hình vào file"""
+    try:
+        with open(CONFIG_FILE, 'w') as f:
+            json.dump(config, f)
+        return True
+    except:
+        return False
+
 # Title
 st.title("📈 Tra cứu Chứng khoán Việt Nam")
 st.markdown("---")
+
+# Load cấu hình đã lưu
+saved_config = load_config()
 
 # Khởi tạo session state cho lịch sử chat
 if "messages" not in st.session_state:
     st.session_state.messages = []
 if "openai_api_key" not in st.session_state:
-    st.session_state.openai_api_key = ""
+    # Tự động load API key từ file cấu hình
+    st.session_state.openai_api_key = saved_config.get("openai_api_key", "")
 if "current_symbol" not in st.session_state:
     st.session_state.current_symbol = None
 if "price_data" not in st.session_state:
@@ -44,26 +72,40 @@ with st.sidebar.expander("🔑 Cấu hình OpenAI API", expanded=not st.session_
         placeholder="sk-proj-..."
     )
     
-    if st.button("✅ Lưu & Kiểm tra kết nối"):
-        if api_key and api_key.startswith("sk-"):
-            try:
-                # Test kết nối
-                test_client = OpenAI(api_key=api_key)
-                test_response = test_client.chat.completions.create(
-                    model="gpt-4o-mini",
-                    messages=[{"role": "user", "content": "test"}],
-                    max_tokens=5
-                )
-                st.session_state.openai_api_key = api_key
-                st.success("✅ Kết nối OpenAI API thành công!")
-            except Exception as e:
-                st.error(f"❌ Lỗi kết nối: {str(e)}")
-                st.info("💡 Kiểm tra lại API key hoặc kết nối internet")
-        else:
-            st.error("❌ API key không hợp lệ! (phải bắt đầu với sk-)")
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        if st.button("✅ Lưu & Kiểm tra", use_container_width=True):
+            if api_key and api_key.startswith("sk-"):
+                try:
+                    # Test kết nối
+                    test_client = OpenAI(api_key=api_key)
+                    test_response = test_client.chat.completions.create(
+                        model="gpt-4o-mini",
+                        messages=[{"role": "user", "content": "test"}],
+                        max_tokens=5
+                    )
+                    st.session_state.openai_api_key = api_key
+                    # Lưu vào file
+                    if save_config({"openai_api_key": api_key}):
+                        st.success("✅ API key đã lưu vĩnh viễn!")
+                    else:
+                        st.warning("⚠️ Kết nối OK nhưng không lưu được vào file")
+                except Exception as e:
+                    st.error(f"❌ Lỗi kết nối: {str(e)}")
+                    st.info("💡 Kiểm tra lại API key hoặc kết nối internet")
+            else:
+                st.error("❌ API key không hợp lệ! (phải bắt đầu với sk-)")
+    
+    with col2:
+        if st.button("🗑️ Xóa API Key", use_container_width=True):
+            st.session_state.openai_api_key = ""
+            save_config({"openai_api_key": ""})
+            st.success("✅ Đã xóa API key")
+            st.rerun()
     
     if st.session_state.openai_api_key:
-        st.info("🟢 API Key đã được lưu")
+        st.info("🟢 API Key đã được lưu và tự động kết nối")
 
 st.sidebar.markdown("---")
 
