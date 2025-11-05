@@ -89,14 +89,19 @@ def fetch_stock_data(symbol, industry):
                 '%': change_pct
             }
     except Exception as e:
+        # Nếu bị rate limit, thêm delay ngắn
+        error_msg = str(e).lower()
+        if 'rate' in error_msg or 'limit' in error_msg or 'many' in error_msg:
+            time.sleep(0.5)
         return None
     return None
 
-# Cache dữ liệu thị trường trong 3 phút
-@st.cache_data(ttl=180)  # Cache 3 phút = 180 giây
+# Cache dữ liệu thị trường trong 5 phút (tăng từ 3 phút để giảm tần suất gọi API)
+@st.cache_data(ttl=300)  # Cache 5 phút = 300 giây
 def fetch_market_data_cached(industry_groups_tuple):
     """
     Lấy dữ liệu thị trường với cache, parallel processing và smart delay
+    Tối ưu để tránh rate limit từ TCBS API
     """
     industry_groups = dict(industry_groups_tuple)
     all_data = []
@@ -107,14 +112,14 @@ def fetch_market_data_cached(industry_groups_tuple):
         for symbol in symbols:
             tasks.append((symbol, industry))
     
-    # Chia thành các batch để tránh quá tải (15 mã/batch để tối ưu với 120 mã)
-    batch_size = 15
+    # Chia thành các batch rất nhỏ để tránh rate limit nghiêm ngặt từ TCBS
+    batch_size = 5  # Giảm xuống 5 mã/batch để an toàn tối đa
     batches = [tasks[i:i+batch_size] for i in range(0, len(tasks), batch_size)]
     
     # Xử lý từng batch với parallel processing
     for batch_idx, batch in enumerate(batches):
-        # Parallel fetch cho mỗi batch với 8 workers để xử lý nhanh hơn
-        with ThreadPoolExecutor(max_workers=8) as executor:
+        # Parallel fetch cho mỗi batch với 3 workers (giảm từ 5 để rất an toàn)
+        with ThreadPoolExecutor(max_workers=3) as executor:
             future_to_symbol = {
                 executor.submit(fetch_stock_data, symbol, industry): symbol 
                 for symbol, industry in batch
@@ -125,9 +130,9 @@ def fetch_market_data_cached(industry_groups_tuple):
                 if result:
                     all_data.append(result)
         
-        # Delay giữa các batch để tránh rate limit (trừ batch cuối)
+        # Tăng delay rất lớn giữa các batch để hoàn toàn tránh bị TCBS chặn
         if batch_idx < len(batches) - 1:
-            time.sleep(0.4)  # Giảm delay xuống 0.4s với batch lớn hơn
+            time.sleep(2.0)  # Tăng delay lên 2 giây để an toàn tối đa
     
     return all_data
 
@@ -248,7 +253,7 @@ with st.sidebar.form(key="search_form"):
 # ==================== BẢNG GIÁ THỊ TRƯỜNG ====================
 if hasattr(st.session_state, 'market_view_mode') and st.session_state.market_view_mode:
     st.header("📊 Bảng giá thị trường - 120 mã phổ biến")
-    st.info("📈 Dữ liệu cập nhật theo thời gian thực từ TCBS - Ưu tiên các mã có thanh khoản tốt")
+    st.info("📈 Dữ liệu cache 5 phút - Tối ưu để tránh rate limit từ TCBS")
     
     # Định nghĩa các nhóm ngành với các mã phổ biến và có thanh khoản tốt (tối đa 20 mã/ngành)
     industry_groups = {
@@ -267,7 +272,7 @@ if hasattr(st.session_state, 'market_view_mode') and st.session_state.market_vie
     }
     
     # Tạo container cho bảng
-    with st.spinner("⏳ Đang tải 120 mã từ thị trường... (Cache 3 phút)"):
+    with st.spinner("⏳ Đang tải 120 mã từ thị trường... Vui lòng chờ ~50-60 giây (Cache 5 phút)"):
         # Convert dict to tuple for caching
         industry_groups_tuple = tuple((k, tuple(v)) for k, v in industry_groups.items())
         
