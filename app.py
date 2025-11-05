@@ -41,6 +41,26 @@ def save_config(config):
     except:
         return False
 
+def load_ptkt_examples():
+    """Đọc các file mẫu khuyến nghị Chim Cút"""
+    examples = []
+    example_files = [
+        "knowledge/maukhuyennghichimcut1.txt",
+        "knowledge/maukhuyennghichimcut2.txt",
+        "knowledge/maukhuyennghichimcut3.txt"
+    ]
+    
+    for file_path in example_files:
+        try:
+            if os.path.exists(file_path):
+                with open(file_path, 'r', encoding='utf-8') as f:
+                    content = f.read()
+                    examples.append(content)
+        except Exception as e:
+            st.warning(f"Không thể đọc file {file_path}: {str(e)}")
+    
+    return "\n\n---\n\n".join(examples) if examples else ""
+
 # Title
 st.title("📈 Trợ lý AI stock")
 st.markdown("---")
@@ -302,7 +322,45 @@ if st.session_state.current_symbol:
             col1, col2 = st.columns([1, 1])
             with col1:
                 if st.button("🎯 PTKT Chim Cút", use_container_width=True, type="primary", key="ptkt_button"):
-                    auto_prompt = f"Phân tích kỹ thuật cổ phiếu {symbol} theo phương pháp Chim Cút. Hãy áp dụng CHÍNH XÁC các quy tắc về MA, ADX, Volume và đưa ra khuyến nghị cụ thể."
+                    # Đọc các file mẫu khuyến nghị
+                    ptkt_examples = load_ptkt_examples()
+                    
+                    # Tạo prompt chi tiết với các file mẫu
+                    auto_prompt = f"""Phân tích TOÀN DIỆN và CHI TIẾT cổ phiếu {symbol} theo phương pháp Chim Cút.
+
+YÊU CẦU QUAN TRỌNG:
+1. Phải phân tích ĐẦY ĐỦ TẤT CẢ các phần như trong mẫu
+2. Sử dụng CHÍNH XÁC format và emoji như mẫu (✨ ━ ▸ • →)
+3. Đưa ra con số cụ thể, không được nói chung chung
+4. Phải tính toán và đưa ra các mức giá cụ thể
+
+CÁC PHẦN BẮT BUỘC PHẢI CÓ:
+▸ Xu Hướng Giá (ngắn hạn, trung hạn, dài hạn với MA5, MA10, MA20, MA50, MA100, MA200)
+▸ Xu Hướng Khối Lượng (so sánh VMA5, VMA20, VMA50, VMA100, VMA200)
+▸ Kết Hợp Giá & Khối Lượng (phân tích 3 khung thời gian)
+▸ Phân Tích Cung - Cầu (POC, vùng khối lượng cao, VWAP)
+▸ Mức Giá Quan Trọng (kháng cự, hỗ trợ, breakout, breakdown)
+▸ Biến Động Giá (ATR5, ATR20, so sánh biến động)
+▸ Mô Hình Giá & Nến (pattern, độ tin cậy, ADX)
+⚠ Rủi Ro & Tương Quan Thị Trường (tương quan VNINDEX)
+▸ Khuyến Nghị Vị Thế (MUA/BÁN/QUAN SÁT với lý do cụ thể)
+▸ Giá Mục Tiêu (kịch bản tăng và giảm với Fibonacci)
+
+Dưới đây là 3 ví dụ mẫu HOÀN CHỈNH. Hãy làm theo CHÍNH XÁC format và mức độ chi tiết này:
+
+━━━━━━━━━━━━━━━━━━━━━━━━━
+{ptkt_examples}
+━━━━━━━━━━━━━━━━━━━━━━━━━
+
+BÂY GIỜ hãy phân tích cổ phiếu {symbol} với:
+- ĐẦY ĐỦ TẤT CẢ các phần như mẫu trên
+- Format CHÍNH XÁC như mẫu (emoji, gạch đầu dòng, cấu trúc)
+- Con số CỤ THỂ cho tất cả các chỉ số
+- Khuyến nghị RÕ RÀNG (MUA/BÁN/QUAN SÁT)
+- Giá mục tiêu CỤ THỂ
+
+KHÔNG được bỏ qua bất kỳ phần nào!"""
+                    
                     st.session_state.messages.append({
                         "role": "user",
                         "content": auto_prompt,
