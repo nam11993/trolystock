@@ -133,6 +133,15 @@ with st.sidebar.expander("🔑 Cấu hình OpenAI API", expanded=not st.session_
 
 st.sidebar.markdown("---")
 
+# Thêm nút xem bảng giá thị trường
+st.sidebar.subheader("📊 Bảng giá thị trường")
+
+if st.sidebar.button("📈 Xem bảng giá theo ngành", use_container_width=True, type="secondary"):
+    st.session_state.market_view_mode = True
+    st.rerun()
+
+st.sidebar.markdown("---")
+
 # Thêm tab tìm cổ phiếu tốt
 st.sidebar.subheader("🔍 Tìm cổ phiếu đáng mua")
 
@@ -165,6 +174,115 @@ with st.sidebar.form(key="search_form"):
 
     # Button để lấy dữ liệu
     submit_button = st.form_submit_button("🔍 Tra cứu", type="primary", use_container_width=True)
+
+# ==================== BẢNG GIÁ THỊ TRƯỜNG ====================
+if hasattr(st.session_state, 'market_view_mode') and st.session_state.market_view_mode:
+    st.header("📊 Bảng giá thị trường - 50 mã phổ biến")
+    st.info("📈 Dữ liệu cập nhật theo thời gian thực từ TCBS")
+    
+    # Định nghĩa các nhóm ngành với 50 mã phổ biến nhất
+    industry_groups = {
+        "VN30": ["VCB", "VHM", "VIC", "HPG", "MSN", "VNM", "FPT", "MWG", "VRE", "PLX",
+                 "GAS", "TCB", "BID", "CTG", "VPB", "MBB", "POW", "SAB", "SSI", "HDB"],
+        "NGÂN HÀNG": ["ACB", "STB", "TPB", "VIB", "LPB"],
+        "CHỨNG KHOÁN": ["VND", "HCM", "VCI", "FTS", "BSI"],
+        "BẤT ĐỘNG SẢN": ["NVL", "DXG", "KDH", "PDR", "HDG"],
+        "CÔNG NGHIỆP": ["HSG", "NKG", "DGC", "DCM", "GVR"],
+        "NĂNG LƯỢNG": ["PVS", "PVD", "BSR", "PVC", "PVT"],
+    }
+    
+    # Tạo container cho bảng
+    with st.spinner("⏳ Đang tải 50 mã từ thị trường..."):
+        all_data = []
+        
+        for industry, symbols in industry_groups.items():
+            for symbol in symbols:
+                try:
+                    # Lấy dữ liệu giá
+                    stock = Vnstock().stock(symbol=symbol, source="TCBS")
+                    price_data = stock.quote.history(
+                        start=(datetime.now() - timedelta(days=5)).strftime('%Y-%m-%d'),
+                        end=datetime.now().strftime('%Y-%m-%d'),
+                        interval='1D'
+                    )
+                    
+                    if not price_data.empty and len(price_data) > 0:
+                        latest = price_data.iloc[-1]
+                        close_price = float(latest['close'])
+                        open_price = float(latest['open'])
+                        change = close_price - open_price
+                        change_pct = (change / open_price * 100) if open_price > 0 else 0
+                        
+                        all_data.append({
+                            'Ngành': industry,
+                            'Mã': symbol,
+                            'Giá': close_price,
+                            '+/-': change,
+                            '%': change_pct
+                        })
+                except Exception as e:
+                    continue
+        
+        # Hiển thị theo CỘT - mỗi ngành một cột
+        if all_data:
+            df = pd.DataFrame(all_data)
+            
+            # Tạo các cột cho mỗi ngành
+            st.markdown("### 📊 Bảng giá thị trường theo ngành")
+            
+            # Số cột hiển thị
+            num_industries = len(industry_groups)
+            cols = st.columns(num_industries)
+            
+            # Hiển thị từng ngành trong một cột riêng
+            for idx, (industry, symbols) in enumerate(industry_groups.items()):
+                with cols[idx]:
+                    st.markdown(f"**{industry}**")
+                    
+                    # Lọc dữ liệu theo ngành
+                    industry_df = df[df['Ngành'] == industry].copy()
+                    
+                    if not industry_df.empty:
+                        # Sắp xếp theo % từ TĂNG đến GIẢM
+                        industry_df = industry_df.sort_values(by='%', ascending=False).reset_index(drop=True)
+                        
+                        # Hiển thị từng mã trong cột
+                        for _, row in industry_df.iterrows():
+                            price = row['Giá']
+                            change_pct = row['%']
+                            
+                            # Chọn màu dựa trên % thay đổi
+                            if change_pct > 0:
+                                color = "green"
+                                bg_color = "#d4edda"
+                            elif change_pct < 0:
+                                color = "red"
+                                bg_color = "#f8d7da"
+                            else:
+                                color = "black"
+                                bg_color = "#ffffff"
+                            
+                            # Hiển thị mã với màu nền
+                            st.markdown(
+                                f'<div style="background-color: {bg_color}; padding: 5px; margin: 2px 0; border-radius: 3px;">'
+                                f'<span style="font-weight: bold;">{row["Mã"]}</span> '
+                                f'<span style="font-size: 0.9em;">{price:,.2f}</span> '
+                                f'<span style="color: {color}; font-weight: bold;">{change_pct:+.2f}%</span>'
+                                f'</div>',
+                                unsafe_allow_html=True
+                            )
+            
+            st.markdown("---")
+            st.success(f"✅ Đã tải {len(df)} mã cổ phiếu từ {num_industries} nhóm ngành")
+        else:
+            st.error("❌ Không thể tải dữ liệu từ thị trường")
+    
+    # Nút quay lại
+    if st.button("🔙 Quay lại tra cứu"):
+        st.session_state.market_view_mode = False
+        st.rerun()
+    
+    st.markdown("---")
 
 # ==================== SCAN CỔ PHIẾU TỐT ====================
 if hasattr(st.session_state, 'scan_mode') and st.session_state.scan_mode:
