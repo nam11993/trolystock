@@ -57,23 +57,25 @@ streamlit run app.py
 
 ## 📚 Dạy AI kiến thức mới
 
-### File kiến thức: `ai_knowledge.txt`
-- Chứa toàn bộ kiến thức của AI
-- Có thể chỉnh sửa và bổ sung
-- AI tự động học khi reload app
+### Cách 1: Chỉnh sửa file `ai_knowledge.txt`
+- File kiến thức cơ bản của AI
+- Chỉnh sửa trực tiếp
 
-### Ví dụ thêm kiến thức:
-```markdown
-## 9. KIẾN THỨC MỚI
+### Cách 2: Thêm file vào thư mục `knowledge/` ⭐ MỚI
+- Tạo file `.txt` hoặc `.md` trong thư mục `knowledge/`
+- AI tự động đọc TẤT CẢ file
+- Dễ dàng tổ chức theo chủ đề
 
-### Phân tích theo mùa vụ
-- Q1: Ngành tiêu dùng tốt (Tết)
-- Q2: Du lịch phục hồi
-- Q3: Mùa thấp điểm
-- Q4: Cao điểm cuối năm
+**Ví dụ:**
+```
+knowledge/
+  ├── nganh_ngan_hang.txt       # Kiến thức ngành ngân hàng
+  ├── co_phieu_yeu_thich.md     # Phân tích cổ phiếu ưa thích
+  ├── kinh_nghiem_dau_tu.txt    # Kinh nghiệm cá nhân
+  └── chien_luoc_2024.md        # Chiến lược năm nay
 ```
 
-📖 **Chi tiết**: Xem file `HUONG_DAN_SU_DUNG_AI.md`
+📖 **Chi tiết**: Xem file `knowledge/README.md`
 
 ## 💬 Cách sử dụng AI
 
@@ -123,6 +125,10 @@ trolystock/
 ├── app_simple.py              # Simple version (no AI)
 ├── vnstock_demo.py            # Demo script
 ├── ai_knowledge.txt           # AI knowledge base
+├── knowledge/                 # 📁 Thư mục kiến thức (thêm file vào đây!)
+│   ├── README.md             # Hướng dẫn sử dụng thư mục
+│   ├── co_phieu_pho_bien.txt # Ví dụ: Kiến thức cổ phiếu
+│   └── TEMPLATE.txt          # Template tạo file mới
 ├── HUONG_DAN_SU_DUNG_AI.md   # AI usage guide
 ├── requirements.txt           # Dependencies
 └── README.md                  # This file

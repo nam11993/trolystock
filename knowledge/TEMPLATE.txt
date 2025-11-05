@@ -1,0 +1,64 @@
+# MẪU FILE KIẾN THỨC - BẠN CÓ THỂ TẠO THÊM
+
+Đây là file mẫu để bạn tham khảo cách tổ chức kiến thức.
+
+## 📝 Các loại file bạn có thể tạo:
+
+### 1. Phân tích ngành
+- `nganh_cong_nghe.txt`
+- `nganh_bat_dong_san.txt`
+- `nganh_tieu_dung.txt`
+- `nganh_ngan_hang.txt`
+
+### 2. Kiến thức kỹ thuật
+- `chi_bao_ky_thuat.txt`
+- `mo_hinh_nen.txt`
+- `xu_huong_gia.txt`
+
+### 3. Kiến thức cơ bản
+- `chi_so_tai_chinh.txt`
+- `doc_bao_cao_tai_chinh.txt`
+- `dinh_gia_co_phieu.txt`
+
+### 4. Kinh nghiệm cá nhân
+- `kinh_nghiem_dau_tu.txt`
+- `sai_lam_thuong_gap.txt`
+- `bai_hoc_quy_gia.txt`
+
+### 5. Tin tức & Sự kiện
+- `su_kien_2024.txt`
+- `chinh_sach_moi.txt`
+- `xu_huong_thi_truong.txt`
+
+## 💡 Ví dụ nội dung:
+
+### File: `kinh_nghiem_dau_tu.txt`
+```
+# KINH NGHIỆM ĐẦU TƯ CÁ NHÂN
+
+## Nguyên tắc của tôi
+1. Không bao giờ vay nợ để đầu tư
+2. Chỉ đầu tư số tiền có thể mất
+3. Giữ 30% tiền mặt
+4. Stop-loss nghiêm ngặt
+
+## Bài học đắt giá
+- Đừng FOMO khi thị trường tăng mạnh
+- Đừng bán panic khi giảm sâu
+- Tham lam là kẻ thù lớn nhất
+
+## Chiến lược của tôi
+- 50% bluechip: VNM, VCB, FPT
+- 30% growth: Cổ phiếu tăng trưởng
+- 20% cơ hội: Swing trade
+```
+
+## 🎯 Hãy tạo file của riêng bạn!
+
+Bạn có thể:
+1. ✅ Viết kinh nghiệm của bạn
+2. ✅ Tổng hợp kiến thức từ sách, khóa học
+3. ✅ Ghi chú phân tích cá nhân
+4. ✅ Lưu lại bài học từ thực tế
+
+AI sẽ học TẤT CẢ và trả lời dựa trên kiến thức bạn cung cấp!

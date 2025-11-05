@@ -235,12 +235,25 @@ if submit_button:
                             try:
                                 client = OpenAI(api_key=st.session_state.openai_api_key)
                                 
-                                # Đọc kiến thức từ file
-                                try:
-                                    with open("ai_knowledge.txt", "r", encoding="utf-8") as f:
-                                        knowledge_base = f.read()
-                                except:
-                                    knowledge_base = ""
+                                # Đọc kiến thức từ nhiều file
+                                knowledge_base = ""
+                                knowledge_files = ["ai_knowledge.txt"]
+                                
+                                # Tự động tìm tất cả file .txt và .md trong thư mục knowledge
+                                import os
+                                if os.path.exists("knowledge"):
+                                    for file in os.listdir("knowledge"):
+                                        if file.endswith(('.txt', '.md')):
+                                            knowledge_files.append(os.path.join("knowledge", file))
+                                
+                                # Đọc tất cả file kiến thức
+                                for file_path in knowledge_files:
+                                    try:
+                                        with open(file_path, "r", encoding="utf-8") as f:
+                                            content = f.read()
+                                            knowledge_base += f"\n\n--- Từ file: {file_path} ---\n{content}\n"
+                                    except:
+                                        pass
                                 
                                 # Tạo context cho AI với kiến thức đã học
                                 system_prompt = f"""Bạn là chuyên gia phân tích chứng khoán Việt Nam chuyên nghiệp.
