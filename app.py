@@ -136,10 +136,11 @@ st.sidebar.markdown("---")
 # Thêm tab tìm cổ phiếu tốt
 st.sidebar.subheader("🔍 Tìm cổ phiếu đáng mua")
 
-# Danh sách 10 mã phổ biến để test
-popular_symbols = ["VNM", "VCB", "VHM", "VIC", "HPG", "MSN", "FPT", "MWG", "VRE", "PLX"]
+# Danh sách 20 mã phổ biến để test
+popular_symbols = ["VNM", "VCB", "VHM", "VIC", "HPG", "MSN", "FPT", "MWG", "VRE", "PLX", 
+                   "GAS", "TCB", "BID", "CTG", "VPB", "SSI", "HDB", "POW", "SAB", "MBB"]
 
-if st.sidebar.button("🎯 Tìm cổ phiếu tốt (10 mã)", use_container_width=True, type="primary"):
+if st.sidebar.button("🎯 Tìm cổ phiếu tốt (20 mã)", use_container_width=True, type="primary"):
     if not st.session_state.openai_api_key:
         st.sidebar.error("⚠️ Cần có OpenAI API Key để sử dụng tính năng này!")
     else:
@@ -167,8 +168,8 @@ with st.sidebar.form(key="search_form"):
 
 # ==================== SCAN CỔ PHIẾU TỐT ====================
 if hasattr(st.session_state, 'scan_mode') and st.session_state.scan_mode:
-    st.header("🔍 Tìm kiếm cổ phiếu đáng mua theo phương pháp Chim Cút")
-    st.info("🤖 AI đang phân tích CHI TIẾT từng cổ phiếu theo phương pháp PTKT Chim Cút... (10 mã)")
+    st.header("🔍 Tìm cổ phiếu có khuyến nghị MUA theo phương pháp Chim Cút")
+    st.info("🤖 AI đang phân tích CHI TIẾT từng cổ phiếu... Chỉ hiển thị các mã có khuyến nghị MUA.")
     
     # Load kiến thức Chim Cút
     knowledge_base = load_ptkt_examples()
@@ -295,23 +296,23 @@ CHỈ khuyến nghị MUA khi THỰC SỰ có tín hiệu tốt theo kiến th�
                         
                         ai_analysis = response.choices[0].message.content
                         
-                        # Kiểm tra CHẶT CHẼ khuyến nghị MUA
+                        # Lọc CHỈ HIỂN THỊ các mã có khuyến nghị MUA
                         is_buy = False
                         analysis_upper = ai_analysis.upper()
                         
-                        # Tìm chính xác phần "▸ Khuyến Nghị Vị Thế:"
-                        if '▸' in analysis_upper or 'KHUYẾN NGHỊ' in analysis_upper:
+                        # Tìm phần khuyến nghị
+                        if '▸' in analysis_upper or 'KHUYẾN NGHỊ' in analysis_upper or 'VỊ THẾ' in analysis_upper:
                             lines = analysis_upper.split('\n')
                             for line in lines:
                                 if ('KHUYẾN NGHỊ' in line or 'VỊ THẾ' in line or '▸' in line):
                                     # Kiểm tra có từ MUA và KHÔNG có từ phủ định
                                     if 'MUA' in line:
-                                        negative_words = ['KHÔNG', 'CHƯA', 'NÊN BÁN', 'QUAN SÁT']
+                                        negative_words = ['KHÔNG', 'CHƯA', 'NÊN BÁN', 'QUAN SÁT', 'CHƯA MUA']
                                         if not any(neg in line for neg in negative_words):
                                             is_buy = True
                                             break
                         
-                        # CHỈ thêm vào kết quả nếu THỰC SỰ khuyến nghị MUA
+                        # CHỈ thêm và hiển thị nếu có khuyến nghị MUA
                         if is_buy:
                             scan_results.append({
                                 'symbol': sym,
@@ -319,11 +320,11 @@ CHỈ khuyến nghị MUA khi THỰC SỰ có tín hiệu tốt theo kiến th�
                                 'analysis': ai_analysis
                             })
                             
-                            # Hiển thị ngay
+                            # Hiển thị ngay - BỎ chữ VND, chỉ để số
                             with results_container:
-                                with st.expander(f"✅ {sym} - {latest_price:,.0f} VND - ✓ KHUYẾN NGHỊ MUA", expanded=True):
-                                    st.markdown(f"**Giá hiện tại:** {latest_price:,.0f} VND")
-                                    st.markdown(f"**Thay đổi:** {change:,.2f} VND ({change_pct:+.2f}%)")
+                                with st.expander(f"✅ {sym} - {latest_price:,.2f}", expanded=True):
+                                    st.markdown(f"**Giá hiện tại:** {latest_price:,.2f}")
+                                    st.markdown(f"**Thay đổi:** {change:,.2f} ({change_pct:+.2f}%)")
                                     st.markdown("---")
                                     st.markdown(ai_analysis)
                     except Exception as e:
@@ -337,13 +338,13 @@ CHỈ khuyến nghị MUA khi THỰC SỰ có tín hiệu tốt theo kiến th�
     
     # Tóm tắt kết quả
     if scan_results:
-        st.success(f"✅ Tìm thấy {len(scan_results)} cổ phiếu KHUYẾN NGHỊ MUA!")
+        st.success(f"✅ Tìm thấy {len(scan_results)} cổ phiếu có KHUYẾN NGHỊ MUA!")
         
-        st.markdown("### 🎯 TÓM TẮT TOP CỔ PHIẾU ĐÁNG MUA:")
+        st.markdown("### 🎯 TÓM TẮT TOP CỔ PHIẾU KHUYẾN NGHỊ MUA:")
         for result in scan_results:
-            st.markdown(f"**{result['symbol']}** - Giá: {result['price']:,.0f} VND")
+            st.markdown(f"**{result['symbol']}** - Giá: {result['price']:,.2f}")
     else:
-        st.warning("⚠️ Không tìm thấy cổ phiếu nào có khuyến nghị MUA trong danh sách.")
+        st.warning("⚠️ Không tìm thấy cổ phiếu nào có khuyến nghị MUA trong danh sách 10 mã.")
     
     # Reset scan mode
     if st.button("🔙 Quay lại tra cứu thường"):
