@@ -78,6 +78,10 @@ if "current_symbol" not in st.session_state:
     st.session_state.current_symbol = None
 if "price_data" not in st.session_state:
     st.session_state.price_data = None
+if "scan_mode" not in st.session_state:
+    st.session_state.scan_mode = False
+if "scan_symbols" not in st.session_state:
+    st.session_state.scan_symbols = []
 
 # Sidebar
 st.sidebar.header("⚙️ Cài đặt")
@@ -129,6 +133,22 @@ with st.sidebar.expander("🔑 Cấu hình OpenAI API", expanded=not st.session_
 
 st.sidebar.markdown("---")
 
+# Thêm tab tìm cổ phiếu tốt
+st.sidebar.subheader("🔍 Tìm cổ phiếu đáng mua")
+
+# Danh sách 10 mã phổ biến để test
+popular_symbols = ["VNM", "VCB", "VHM", "VIC", "HPG", "MSN", "FPT", "MWG", "VRE", "PLX"]
+
+if st.sidebar.button("🎯 Tìm cổ phiếu tốt (10 mã)", use_container_width=True, type="primary"):
+    if not st.session_state.openai_api_key:
+        st.sidebar.error("⚠️ Cần có OpenAI API Key để sử dụng tính năng này!")
+    else:
+        st.session_state.scan_mode = True
+        st.session_state.scan_symbols = popular_symbols
+        st.rerun()
+
+st.sidebar.markdown("---")
+
 # Form để có thể nhấn Enter
 with st.sidebar.form(key="search_form"):
     # Input mã chứng khoán
@@ -144,6 +164,193 @@ with st.sidebar.form(key="search_form"):
 
     # Button để lấy dữ liệu
     submit_button = st.form_submit_button("🔍 Tra cứu", type="primary", use_container_width=True)
+
+# ==================== SCAN CỔ PHIẾU TỐT ====================
+if hasattr(st.session_state, 'scan_mode') and st.session_state.scan_mode:
+    st.header("🔍 Tìm kiếm cổ phiếu đáng mua theo phương pháp Chim Cút")
+    st.info("🤖 AI đang phân tích CHI TIẾT từng cổ phiếu theo phương pháp PTKT Chim Cút... (10 mã)")
+    
+    # Load kiến thức Chim Cút
+    knowledge_base = load_ptkt_examples()
+    
+    scan_results = []
+    progress_bar = st.progress(0)
+    status_text = st.empty()
+    results_container = st.container()
+    
+    symbols = st.session_state.scan_symbols
+    total = len(symbols)
+    
+    # Tạo OpenAI client
+    if st.session_state.openai_api_key:
+        client = OpenAI(api_key=st.session_state.openai_api_key)
+        
+        for idx, sym in enumerate(symbols):
+            status_text.text(f"📊 Phân tích {sym}... ({idx+1}/{total})")
+            progress_bar.progress((idx + 1) / total)
+            
+            try:
+                # Lấy dữ liệu giống như nút PTKT - dùng chính xác API vnstock
+                stock = Vnstock().stock(symbol=sym, source="TCBS")
+                
+                # Lấy dữ liệu 365 ngày
+                history_365d = stock.quote.history(
+                    start=(datetime.now() - timedelta(days=365)).strftime('%Y-%m-%d'),
+                    end=datetime.now().strftime('%Y-%m-%d'),
+                    interval='1D'
+                )
+                
+                if not history_365d.empty and len(history_365d) >= 50:
+                    # Lấy thông tin giá mới nhất - giống PTKT
+                    latest = history_365d.iloc[-1]
+                    latest_price = float(latest['close'])
+                    
+                    # Tính toán các MA - giống PTKT
+                    ma5 = float(history_365d['close'].rolling(5).mean().iloc[-1])
+                    ma10 = float(history_365d['close'].rolling(10).mean().iloc[-1])
+                    ma20 = float(history_365d['close'].rolling(20).mean().iloc[-1])
+                    ma50 = float(history_365d['close'].rolling(50).mean().iloc[-1])
+                    
+                    # Khối lượng
+                    avg_volume_20 = history_365d['volume'].rolling(20).mean().iloc[-1]
+                    volume_ratio = (latest['volume'] / avg_volume_20) * 100 if avg_volume_20 > 0 else 0
+                    
+                    # Thay đổi giá
+                    change = latest['close'] - latest['open']
+                    change_pct = (change / latest['open']) * 100 if latest['open'] > 0 else 0
+                    
+                    # Lấy 30 ngày gần nhất để phân tích
+                    recent_30 = history_365d.tail(30)
+                    
+                    # Tạo thông tin cổ phiếu chi tiết - giống PTKT
+                    stock_info = f"""
+📊 DỮ LIỆU CỔ PHIẾU {sym}:
+
+GIÁ HIỆN TẠI:
+- Giá đóng cửa: {latest['close']:,.2f} VND
+- Thay đổi: {change:,.2f} VND ({change_pct:+.2f}%)
+- Giá mở cửa: {latest['open']:,.2f} VND
+- Cao nhất: {latest['high']:,.2f} VND
+- Thấp nhất: {latest['low']:,.2f} VND
+
+KHỐI LƯỢNG:
+- KL hôm nay: {latest['volume']:,.0f}
+- KL TB 20 ngày: {avg_volume_20:,.0f}
+- Tỷ lệ KL/TB: {volume_ratio:.1f}% {'(CAO)' if volume_ratio > 150 else '(THẤP)' if volume_ratio < 50 else '(BÌNH THƯỜNG)'}
+
+ĐƯỜNG TRUNG BÌNH (MA):
+- MA5: {ma5:,.2f} VND → Giá {'TRÊN' if latest['close'] > ma5 else 'DƯỚI'} MA5 ({(latest['close']/ma5*100-100):+.2f}%)
+- MA10: {ma10:,.2f} VND → Giá {'TRÊN' if latest['close'] > ma10 else 'DƯỚI'} MA10 ({(latest['close']/ma10*100-100):+.2f}%)
+- MA20: {ma20:,.2f} VND → Giá {'TRÊN' if latest['close'] > ma20 else 'DƯỚI'} MA20 ({(latest['close']/ma20*100-100):+.2f}%)
+- MA50: {ma50:,.2f} VND → Giá {'TRÊN' if latest['close'] > ma50 else 'DƯỚI'} MA50 ({(latest['close']/ma50*100-100):+.2f}%)
+
+XU HƯỚNG 30 NGÀY GẦN ĐÂY:
+- Giá cao nhất: {recent_30['high'].max():,.2f} VND
+- Giá thấp nhất: {recent_30['low'].min():,.2f} VND
+- Biên độ: {((recent_30['high'].max() - recent_30['low'].min()) / recent_30['low'].min() * 100):.2f}%
+"""
+                    
+                    # Tạo system prompt giống PTKT - ÁP DỤNG ĐẦY ĐỦ KIẾN THỨC CHIM CÚT
+                    system_prompt = f"""Bạn là chuyên gia phân tích kỹ thuật chứng khoán Việt Nam theo phương pháp Chim Cút.
+
+═══════════════════════════════════════════════════════
+📚 KIẾN THỨC CỦA BẠN (3 mẫu phân tích Chim Cút chi tiết):
+═══════════════════════════════════════════════════════
+{knowledge_base}
+
+🎯 NHIỆM VỤ PHÂN TÍCH NHANH:
+Áp dụng CHÍNH XÁC kiến thức Chim Cút đã học:
+
+1. **Xu hướng**: dựa vào giá so với MA5/10/20/50
+2. **Volume**: So sánh với TB 20 ngày theo bảng kiến thức
+3. **Vùng cung cầu**: Hỗ trợ & kháng cự từ data 30 ngày
+4. **Khuyến nghị**: Theo bảng "Quy tắc tổng hợp"
+
+CẤU TRÚC TRẢ LỜI NGẮN GỌN (200 từ):
+• **I. Xu hướng** (ngắn/trung hạn với số liệu)
+• **II. Volume & Momentum**
+• **III. Vùng hỗ trợ & kháng cự**
+• **IV. ▸ Khuyến Nghị Vị Thế: MUA / BÁN / GOM / QUAN SÁT**
+• **V. Quản trị lệnh** (nếu MUA: giá vào, SL)
+"""
+                    
+                    # User prompt với dữ liệu cổ phiếu
+                    user_prompt = f"""{stock_info}
+
+Hãy phân tích NHANH nhưng ĐẦY ĐỦ theo phương pháp Chim Cút.
+BẮT BUỘC có phần "▸ Khuyến Nghị Vị Thế:" rõ ràng.
+CHỈ khuyến nghị MUA khi THỰC SỰ có tín hiệu tốt theo kiến thức đã học."""
+
+                    # Gọi AI phân tích - giống PTKT
+                    try:
+                        response = client.chat.completions.create(
+                            model="gpt-4o-mini",
+                            messages=[
+                                {"role": "system", "content": system_prompt},
+                                {"role": "user", "content": user_prompt}
+                            ],
+                            max_tokens=800,
+                            temperature=0.3
+                        )
+                        
+                        ai_analysis = response.choices[0].message.content
+                        
+                        # Kiểm tra CHẶT CHẼ khuyến nghị MUA
+                        is_buy = False
+                        analysis_upper = ai_analysis.upper()
+                        
+                        # Tìm chính xác phần "▸ Khuyến Nghị Vị Thế:"
+                        if '▸' in analysis_upper or 'KHUYẾN NGHỊ' in analysis_upper:
+                            lines = analysis_upper.split('\n')
+                            for line in lines:
+                                if ('KHUYẾN NGHỊ' in line or 'VỊ THẾ' in line or '▸' in line):
+                                    # Kiểm tra có từ MUA và KHÔNG có từ phủ định
+                                    if 'MUA' in line:
+                                        negative_words = ['KHÔNG', 'CHƯA', 'NÊN BÁN', 'QUAN SÁT']
+                                        if not any(neg in line for neg in negative_words):
+                                            is_buy = True
+                                            break
+                        
+                        # CHỈ thêm vào kết quả nếu THỰC SỰ khuyến nghị MUA
+                        if is_buy:
+                            scan_results.append({
+                                'symbol': sym,
+                                'price': latest_price,
+                                'analysis': ai_analysis
+                            })
+                            
+                            # Hiển thị ngay
+                            with results_container:
+                                with st.expander(f"✅ {sym} - {latest_price:,.0f} VND - ✓ KHUYẾN NGHỊ MUA", expanded=True):
+                                    st.markdown(f"**Giá hiện tại:** {latest_price:,.0f} VND")
+                                    st.markdown(f"**Thay đổi:** {change:,.2f} VND ({change_pct:+.2f}%)")
+                                    st.markdown("---")
+                                    st.markdown(ai_analysis)
+                    except Exception as e:
+                        st.warning(f"⚠️ Lỗi phân tích AI cho {sym}: {str(e)}")
+                        
+            except Exception as e:
+                continue
+    
+    progress_bar.empty()
+    status_text.empty()
+    
+    # Tóm tắt kết quả
+    if scan_results:
+        st.success(f"✅ Tìm thấy {len(scan_results)} cổ phiếu KHUYẾN NGHỊ MUA!")
+        
+        st.markdown("### 🎯 TÓM TẮT TOP CỔ PHIẾU ĐÁNG MUA:")
+        for result in scan_results:
+            st.markdown(f"**{result['symbol']}** - Giá: {result['price']:,.0f} VND")
+    else:
+        st.warning("⚠️ Không tìm thấy cổ phiếu nào có khuyến nghị MUA trong danh sách.")
+    
+    # Reset scan mode
+    if st.button("🔙 Quay lại tra cứu thường"):
+        st.session_state.scan_mode = False
+        st.rerun()
+    
+    st.markdown("---")
 
 # Xử lý khi nhấn button hoặc Enter
 if submit_button:
