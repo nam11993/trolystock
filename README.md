@@ -1,49 +1,175 @@
-# Hướng dẫn sử dụng vnstock API
+# 📈 Trợ lý Chứng khoán Việt Nam với AI
 
-## Cài đặt
+Web app tra cứu và phân tích chứng khoán Việt Nam tích hợp AI GPT để tư vấn đầu tư.
 
+## ✨ Tính năng
+
+### 1. Tra cứu dữ liệu chứng khoán
+- ✅ Dữ liệu giá lịch sử (OHLCV) 1 năm
+- ✅ Biểu đồ nến (Candlestick) tương tác
+- ✅ Biểu đồ khối lượng giao dịch
+- ✅ Thông tin công ty chi tiết
+- ✅ Báo cáo tài chính (BCTC, BCKQKD)
+- ✅ Các chỉ số tài chính (P/E, ROE, ROA...)
+
+### 2. AI Tư vấn đầu tư 🤖
+- ✅ Chat với AI về bất kỳ cổ phiếu nào
+- ✅ Phân tích kỹ thuật và cơ bản
+- ✅ Đánh giá rủi ro và cơ hội
+- ✅ Tư vấn quản lý danh mục
+- ✅ So sánh cổ phiếu
+- ✅ Học kiến thức từ file tùy chỉnh
+
+## 🚀 Cài đặt
+
+### 1. Clone repository
+```bash
+git clone https://github.com/nam11993/trolystock.git
+cd trolystock
+```
+
+### 2. Cài đặt dependencies
 ```bash
 pip install -r requirements.txt
 ```
 
-hoặc
-
+### 3. Chạy ứng dụng
 ```bash
-pip install vnstock3
+streamlit run app.py
 ```
 
-## Chạy chương trình
+### 4. Mở trình duyệt
+- Truy cập: `http://localhost:8503`
 
-```bash
-python vnstock_demo.py
+## 🔑 Cấu hình OpenAI API
+
+### Lấy API Key
+1. Truy cập: https://platform.openai.com/api-keys
+2. Đăng ký/Đăng nhập
+3. Tạo API Key mới
+4. Copy API Key
+
+### Nhập vào ứng dụng
+1. Mở sidebar
+2. Mở rộng "🔑 Cấu hình OpenAI API"
+3. Paste API Key
+4. Hoàn tất!
+
+## 📚 Dạy AI kiến thức mới
+
+### File kiến thức: `ai_knowledge.txt`
+- Chứa toàn bộ kiến thức của AI
+- Có thể chỉnh sửa và bổ sung
+- AI tự động học khi reload app
+
+### Ví dụ thêm kiến thức:
+```markdown
+## 9. KIẾN THỨC MỚI
+
+### Phân tích theo mùa vụ
+- Q1: Ngành tiêu dùng tốt (Tết)
+- Q2: Du lịch phục hồi
+- Q3: Mùa thấp điểm
+- Q4: Cao điểm cuối năm
 ```
 
-## Các tính năng chính
+📖 **Chi tiết**: Xem file `HUONG_DAN_SU_DUNG_AI.md`
 
-1. **Thông tin công ty**: Lấy thông tin tổng quan về công ty
-2. **Dữ liệu giá lịch sử**: Lấy dữ liệu OHLCV (Open, High, Low, Close, Volume)
-3. **Dữ liệu realtime**: Thông tin giao dịch trong ngày
-4. **Báo cáo tài chính**: Bảng cân đối kế toán, báo cáo kết quả kinh doanh
-5. **Chỉ số tài chính**: Các chỉ số như P/E, ROE, ROA, etc.
-6. **Danh sách mã chứng khoán**: Tất cả mã cổ phiếu trên thị trường
+## 💬 Cách sử dụng AI
 
-## Thay đổi mã cổ phiếu
-
-Để lấy dữ liệu của mã khác, thay đổi tham số `symbol`:
-
-```python
-stock = Vnstock().stock(symbol='VCB', source='VCI')  # VCB = Vietcombank
-stock = Vnstock().stock(symbol='FPT', source='VCI')  # FPT Corporation
-stock = Vnstock().stock(symbol='HPG', source='VCI')  # Hoa Phat Group
+### Phân tích kỹ thuật
+```
+Phân tích kỹ thuật VNM
+VNM có xu hướng tăng không?
 ```
 
-## Nguồn dữ liệu
+### Phân tích cơ bản
+```
+Đánh giá định giá VCB
+P/E của FPT có cao không?
+```
 
-- `VCI`: Vietcap Securities (mặc định)
-- `TCBS`: Techcombank Securities
-- `MSN`: MSN Finance
+### So sánh cổ phiếu
+```
+So sánh VCB và TCB
+FPT và VNM, nên chọn cái nào?
+```
 
-## Tài liệu tham khảo
+### Tư vấn mua/bán
+```
+Nên mua HPG ở giá này không?
+VNM giảm 20%, nên bán không?
+```
 
-- GitHub: https://github.com/thinh-vu/vnstock
-- Documentation: https://docs.vnstock.site/
+## 📊 Nguồn dữ liệu
+
+- **vnstock API**: Dữ liệu chứng khoán Việt Nam
+- Nguồn mặc định: **TCBS**
+- Hỗ trợ: VCI, MSN
+
+## 🛠️ Công nghệ
+
+- **Frontend**: Streamlit
+- **Data**: vnstock, pandas
+- **Visualization**: Plotly
+- **AI**: OpenAI GPT-4o-mini
+- **Language**: Python 3.12+
+
+## 📁 Cấu trúc project
+
+```
+trolystock/
+├── app.py                      # Main app
+├── app_simple.py              # Simple version (no AI)
+├── vnstock_demo.py            # Demo script
+├── ai_knowledge.txt           # AI knowledge base
+├── HUONG_DAN_SU_DUNG_AI.md   # AI usage guide
+├── requirements.txt           # Dependencies
+└── README.md                  # This file
+```
+
+## 🎯 Ví dụ sử dụng
+
+### 1. Tra cứu cổ phiếu
+1. Nhập mã: `VNM`
+2. Nhấn Enter hoặc "Tra cứu"
+3. Xem 4 tab: Giá, Công ty, Tài chính, Chỉ số, AI
+
+### 2. Hỏi AI
+1. Vào tab "🤖 AI Phân tích"
+2. Nhập câu hỏi: "Phân tích VNM có nên mua không?"
+3. AI phân tích và tư vấn
+
+### 3. Câu hỏi gợi ý
+- 📊 Phân tích kỹ thuật
+- 💰 Đánh giá định giá
+- ⚠️ Rủi ro đầu tư
+- 🎯 Mục tiêu giá
+
+## ⚠️ Lưu ý quan trọng
+
+- ❌ **KHÔNG** đưa ra lời khuyên đầu tư chắc chắn
+- ⚠️ AI chỉ cung cấp **tham khảo**, không phải lời khuyên tài chính
+- 📊 Luôn tự nghiên cứu trước khi đầu tư
+- 💰 Bạn chịu trách nhiệm với quyết định của mình
+
+## 🤝 Đóng góp
+
+Mọi đóng góp đều được chào đón!
+- Fork repository
+- Tạo branch mới
+- Commit changes
+- Push và tạo Pull Request
+
+## 📝 License
+
+MIT License - Xem file LICENSE
+
+## 📧 Liên hệ
+
+- GitHub: [@nam11993](https://github.com/nam11993)
+- Repository: [trolystock](https://github.com/nam11993/trolystock)
+
+---
+
+**⭐ Nếu thấy hữu ích, hãy star repo này!**

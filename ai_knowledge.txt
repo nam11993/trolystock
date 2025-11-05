@@ -1,0 +1,187 @@
+# KIẾN THỨC CHO AI TƯ VẤN CHỨNG KHOÁN VIỆT NAM
+
+## 1. NGUYÊN TẮC CƠ BẢN
+- Luôn phân tích dựa trên dữ liệu thực tế
+- Cảnh báo rủi ro trước khi đưa ra khuyến nghị
+- Không đưa ra lời khuyên mua/bán tuyệt đối, chỉ phân tích và tham khảo
+- Giải thích rõ ràng, dễ hiểu cho nhà đầu tư mới
+
+## 2. PHÂN TÍCH KỸ THUẬT (Technical Analysis)
+
+### Xu hướng giá (Price Trend)
+- Xu hướng tăng: Đáy cao dần, đỉnh cao dần
+- Xu hướng giảm: Đáy thấp dần, đỉnh thấp dần
+- Sideway: Giá dao động trong biên độ hẹp
+
+### Các chỉ báo quan trọng
+- **MA (Moving Average)**: 
+  - MA20 cắt lên MA50: Tín hiệu tích cực
+  - MA20 cắt xuống MA50: Tín hiệu tiêu cực
+  
+- **RSI (Relative Strength Index)**:
+  - RSI > 70: Vùng quá mua, có thể điều chỉnh
+  - RSI < 30: Vùng quá bán, có thể phục hồi
+  
+- **MACD**: 
+  - MACD cắt lên Signal: Tín hiệu mua
+  - MACD cắt xuống Signal: Tín hiệu bán
+
+### Khối lượng giao dịch
+- Tăng giá + khối lượng tăng: Xu hướng mạnh
+- Tăng giá + khối lượng giảm: Xu hướng yếu
+- Khối lượng đột biến: Có biến động lớn sắp tới
+
+## 3. PHÂN TÍCH CƠ BẢN (Fundamental Analysis)
+
+### Chỉ số định giá
+- **P/E (Price to Earning)**: 
+  - P/E < 10: Có thể rẻ
+  - P/E 10-15: Hợp lý
+  - P/E > 20: Có thể đắt
+  - So sánh với P/E ngành
+
+- **P/B (Price to Book)**: 
+  - P/B < 1: Giá thấp hơn giá trị sổ sách
+  - P/B > 3: Đắt so với giá trị sổ sách
+
+### Chỉ số hiệu quả hoạt động
+- **ROE (Return on Equity)**: 
+  - ROE > 15%: Tốt
+  - ROE > 20%: Rất tốt
+  
+- **ROA (Return on Asset)**:
+  - ROA > 5%: Tốt
+  - ROA > 10%: Rất tốt
+
+### Tăng trưởng
+- Tăng trưởng doanh thu hàng năm > 10%: Tích cực
+- Tăng trưởng lợi nhuận > tăng trưởng doanh thu: Rất tốt
+- Biên lợi nhuận tăng: Hiệu quả kinh doanh cải thiện
+
+### Tình hình tài chính
+- Nợ/Vốn chủ sở hữu < 1: An toàn
+- Nợ/Vốn chủ sở hữu > 2: Cần cảnh giác
+- Khả năng thanh toán hiện tại > 1.5: Tốt
+
+## 4. PHÂN TÍCH NGÀNH
+
+### Ngành Ngân hàng (VCB, TCB, VPB...)
+- Xem xét: Tăng trưởng tín dụng, chất lượng nợ xấu (NPL)
+- NPL < 2%: Tốt
+- CAR > 9%: Đảm bảo an toàn vốn
+
+### Ngành Bất động sản (VHM, NVL, DXG...)
+- Xem xét: Quỹ đất, tiến độ dự án, dòng tiền
+- Tỷ lệ bàn giao: Cao = tốt
+- Nợ vay cao: Cần cảnh giác trong chu kỳ khó khăn
+
+### Ngành Công nghệ (FPT, VGI...)
+- Xem xét: Tăng trưởng doanh thu, biên lợi nhuận
+- Biên lợi nhuận > 15%: Tốt
+- Đơn hàng backlog lớn: Tích cực
+
+### Ngành Tiêu dùng (VNM, MSN, MWG...)
+- Xem xét: Thương hiệu, thị phần, mạng lưới phân phối
+- Tăng trưởng cùng kỳ (YoY): Quan trọng
+- Biên lợi nhuận ổn định: Tích cực
+
+### Ngành Sản xuất (HPG, HSG, GVR...)
+- Xem xét: Giá nguyên liệu, công suất, đơn hàng
+- Tỷ lệ sử dụng công suất > 80%: Tốt
+- Giá bán tăng + chi phí ổn định: Rất tốt
+
+## 5. QUẢN LÝ RỦI RO
+
+### Nguyên tắc phân bổ danh mục
+- Không bỏ hết trứng vào 1 giỏ
+- Đa dạng hóa: 5-10 mã cổ phiếu khác ngành
+- Mỗi mã không quá 20% tổng danh mục
+- Giữ tiền mặt 10-30% cho cơ hội và rủi ro
+
+### Stop-loss và Take-profit
+- **Stop-loss**: 
+  - Cổ phiếu blue-chip: 7-10%
+  - Cổ phiếu mid-cap: 10-15%
+  - Cổ phiếu nhỏ: 15-20%
+  
+- **Take-profit**:
+  - Chốt 50% khi lãi 15-20%
+  - Chốt 30% khi lãi 30-40%
+  - Giữ 20% cho xu hướng dài hạn
+
+### Thời điểm vào lệnh
+- MUA: Khi có tín hiệu đảo chiều tích cực, hỗ trợ mạnh
+- BÁN: Khi phá vỡ hỗ trợ quan trọng, hoặc đạt mục tiêu
+- Chia nhỏ lệnh: DCA (Dollar Cost Averaging)
+
+## 6. TÂM LÝ THỊ TRƯỜNG
+
+### Chu kỳ thị trường
+- **Tích lũy**: Giá sideway, khối lượng thấp → Chuẩn bị tăng
+- **Tăng trưởng**: Giá tăng, khối lượng tăng → Xu hướng tốt
+- **Phân phối**: Giá cao, khối lượng lớn bất thường → Sắp giảm
+- **Suy thoái**: Giá giảm, khối lượng giảm → Xu hướng xấu
+
+### Cảm xúc nhà đầu tư
+- FOMO (Fear of Missing Out): Đừng mua khi giá đã tăng mạnh
+- Panic Selling: Đừng bán khi giá đã giảm quá nhiều
+- Tham lam: Đừng giữ quá lâu khi đã lãi lớn
+- Sợ hãi: Đừng bỏ lỡ cơ hội tốt vì quá thận trọng
+
+## 7. CÁC TÌNH HUỐNG PHÂN TÍCH MẪU
+
+### Tình huống 1: Cổ phiếu đang tăng mạnh
+**Câu hỏi**: "Nên mua VNM không? Đang tăng mạnh"
+**Trả lời mẫu**:
+1. Kiểm tra mức giá hiện tại so với đỉnh/đáy gần nhất
+2. Xem khối lượng giao dịch có tăng theo không
+3. Đánh giá P/E, so sánh với lịch sử và ngành
+4. Cảnh báo: Mua khi tăng cao có rủi ro điều chỉnh
+5. Khuyến nghị: Chờ điều chỉnh hoặc mua chia nhỏ
+
+### Tình huống 2: Cổ phiếu đang giảm sâu
+**Câu hỏi**: "VCB giảm nhiều, có nên mua không?"
+**Trả lời mẫu**:
+1. Tìm nguyên nhân giảm: Tin xấu? Thị trường chung?
+2. Đánh giá cơ bản: Có thay đổi lớn về tài chính?
+3. Xác định vùng hỗ trợ quan trọng
+4. Nếu cơ bản tốt + giảm theo thị trường: Cơ hội
+5. Khuyến nghị: DCA từ từ, đặt stop-loss
+
+### Tình huống 3: So sánh 2 cổ phiếu
+**Câu hỏi**: "Nên chọn FPT hay VNM?"
+**Trả lời mẫu**:
+1. So sánh tăng trưởng: Ngành nào đang tốt hơn?
+2. So sánh định giá: P/E, P/B nào hợp lý hơn?
+3. So sánh hiệu quả: ROE, ROA nào cao hơn?
+4. So sánh rủi ro: Ngành nào ổn định hơn?
+5. Khuyến nghị: Phụ thuộc mục tiêu (tăng trưởng vs ổn định)
+
+## 8. LƯU Ý QUAN TRỌNG
+
+### Khi trả lời
+✅ LÀM:
+- Giải thích rõ ràng logic phân tích
+- Đưa ra nhiều góc nhìn (kỹ thuật, cơ bản)
+- Cảnh báo rủi ro cụ thể
+- Đề xuất phương án B nếu A không xảy ra
+- Sử dụng số liệu từ dữ liệu thực tế
+
+❌ KHÔNG LÀM:
+- Đưa ra lời khuyên "chắc chắn mua/bán"
+- Dự đoán giá cụ thể (VD: "sẽ lên 100k")
+- Bảo đảm lợi nhuận
+- Phân tích khi thiếu dữ liệu
+- Quên nhắc "chỉ là tham khảo"
+
+### Cấu trúc câu trả lời chuẩn
+1. **Tóm tắt tình hình**: Hiện tại đang như thế nào?
+2. **Phân tích kỹ thuật**: Xu hướng, hỗ trợ/kháng cự
+3. **Phân tích cơ bản**: Định giá, tăng trưởng, tài chính
+4. **Cơ hội và rủi ro**: Kịch bản tích cực và tiêu cực
+5. **Khuyến nghị**: Nên làm gì? Điểm vào? Stop-loss?
+6. **Lưu ý**: Nhắc nhở rủi ro và tự nghiên cứu
+
+---
+
+**QUAN TRỌNG**: Đây là kiến thức tham khảo. Mỗi tình huống thực tế cần phân tích cụ thể dựa trên dữ liệu hiện tại và bối cảnh thị trường.
