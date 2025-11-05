@@ -1,6 +1,6 @@
-vnstock3
-pandas
-numpy
-streamlit
-plotly
-openai
+streamlit==1.30.0
+plotly==5.18.0
+pandas==2.1.4
+numpy==1.26.3
+vnstock==3.2.6
+openai==1.12.0
