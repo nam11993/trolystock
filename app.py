@@ -271,192 +271,8 @@ if submit_button:
             # TAB 5: AI Phân tích
             with tab5:
                 st.subheader(f"🤖 AI Phân tích cổ phiếu {symbol}")
-                
-                if not st.session_state.openai_api_key:
-                    st.warning("⚠️ Vui lòng nhập OpenAI API Key ở sidebar để sử dụng tính năng AI")
-                else:
-                    # Chuẩn bị dữ liệu để gửi cho AI
-                    analysis_data = {
-                        "symbol": symbol,
-                        "latest_price": price_data.iloc[-1].to_dict() if not price_data.empty else {},
-                        "price_trend": price_data.tail(30).to_dict() if not price_data.empty else {}
-                    }
-                    
-                    # Nút phân tích nhanh theo Chim Cút
-                    col1, col2, col3 = st.columns([1, 1, 4])
-                    with col1:
-                        if st.button("🎯 PTKT Chim Cút", use_container_width=True, type="primary", key=f"ptkt_{symbol}"):
-                            # Tự động gửi lệnh phân tích
-                            auto_prompt = f"Phân tích kỹ thuật cổ phiếu {symbol} theo phương pháp Chim Cút. Hãy áp dụng CHÍNH XÁC các quy tắc về MA, ADX, Volume và đưa ra khuyến nghị cụ thể."
-                            
-                            # Thêm vào messages
-                            st.session_state.messages.append({
-                                "role": "user",
-                                "content": auto_prompt,
-                                "symbol": symbol
-                            })
-                            st.rerun()
-                    
-                    with col2:
-                        if st.button("🔄 Xóa lịch sử", use_container_width=True, key=f"clear_{symbol}"):
-                            st.session_state.messages = [m for m in st.session_state.messages if m["symbol"] != symbol]
-                            st.rerun()
-                    
-                    # Debug info
-                    with col3:
-                        user_count = len([m for m in st.session_state.messages if m["symbol"] == symbol and m["role"] == "user"])
-                        ai_count = len([m for m in st.session_state.messages if m["symbol"] == symbol and m["role"] == "assistant"])
-                        if user_count > 0 or ai_count > 0:
-                            st.caption(f"💬 User: {user_count} | AI: {ai_count}")
-                    
-                    # Hiển thị lịch sử chat
-                    for message in st.session_state.messages:
-                        if message["symbol"] == symbol:
-                            with st.chat_message(message["role"]):
-                                st.markdown(message["content"])
-                    
-                    # Kiểm tra xem có message của user chưa được AI trả lời không
-                    user_messages = [m for m in st.session_state.messages if m["symbol"] == symbol and m["role"] == "user"]
-                    assistant_messages = [m for m in st.session_state.messages if m["symbol"] == symbol and m["role"] == "assistant"]
-                    
-                    # Nếu số message user > assistant, nghĩa là có câu hỏi chưa trả lời
-                    if len(user_messages) > len(assistant_messages):
-                        # Lấy câu hỏi cuối cùng chưa được trả lời
-                        prompt = user_messages[-1]["content"]
-                        
-                        # Gọi AI để trả lời
-                        with st.chat_message("assistant"):
-                            with st.spinner("🤖 AI đang phân tích, vui lòng đợi..."):
-                                try:
-                                    # Khởi tạo OpenAI client
-                                    client = OpenAI(api_key=st.session_state.openai_api_key)
-                                    
-                                    # Đọc kiến thức Chim Cút
-                                    import os
-                                    knowledge_base = ""
-                                    
-                                    if "chim cút" in prompt.lower() or "ptkt" in prompt.lower() or "phương pháp chim cút" in prompt.lower():
-                                        # Đọc file kienthucchimcut.txt
-                                        kb_file = "knowledge/kienthucchimcut.txt"
-                                        if os.path.exists(kb_file):
-                                            with open(kb_file, "r", encoding="utf-8") as f:
-                                                knowledge_base = f.read()
-                                    else:
-                                        # Đọc file kiến thức chung
-                                        if os.path.exists("ai_knowledge.txt"):
-                                            with open("ai_knowledge.txt", "r", encoding="utf-8") as f:
-                                                knowledge_base = f.read()
-                                    
-                                    # Tạo context cho AI với kiến thức đã học
-                                    system_prompt = f"""Bạn là chuyên gia phân tích kỹ thuật chứng khoán Việt Nam theo phương pháp Chim Cút.
-
-═══════════════════════════════════════════════════════
-📚 KIẾN THỨC CỐT LÕI CỦA BẠN:
-═══════════════════════════════════════════════════════
-{knowledge_base}
-
-═══════════════════════════════════════════════════════
-📊 DỮ LIỆU CỔ PHIẾU {symbol} HIỆN TẠI:
-═══════════════════════════════════════════════════════
-- Giá gần nhất: {analysis_data['latest_price']}
-- Dữ liệu 30 ngày gần đây đã có trong biểu đồ
-- User có thể cung cấp thêm thông tin về MA, Volume, ADX
-
-═══════════════════════════════════════════════════════
-🎯 NHIỆM VỤ PHÂN TÍCH:
-═══════════════════════════════════════════════════════
-BẮT BUỘC tuân thủ CHÍNH XÁC các quy tắc trong kiến thức đã học, đặc biệt:
-
-1. **Xác định xu hướng** theo MA5/10/20/50/100/200 và ADX
-2. **Phân tích khối lượng** theo bảng đặc điểm (Vol ↑/↓ vs Giá ↑/↓)
-3. **Vùng cung cầu** - xác định hỗ trợ/kháng cự
-4. **Breakout/Bẫy giá** - phân biệt break thật vs bulltrap/beartrap
-5. **Momentum** - đánh giá ADX và CMF
-6. **Khuyến nghị** theo ĐÚNG bảng "Quy tắc tổng hợp" mục VIII
-
-CẤU TRÚC TRẢ LỜI:
-• **I. Tình hình xu hướng** (ngắn/trung/dài hạn)
-• **II. Phân tích Volume & Momentum** (đối chiếu bảng kiến thức)
-• **III. Vùng cung cầu** (support/resistance)
-• **IV. Điều kiện & Khuyến nghị** (theo bảng quy tắc tổng hợp)
-• **V. Quản trị lệnh** (T0/T2/T5 nếu mua, cắt lỗ ở đâu)
-• **VI. Cảnh báo rủi ro**
-
-⚠️ LƯU Ý:
-- SỬ DỤNG CHÍNH XÁC các ngưỡng số trong kiến thức (ADX>30, Vol>150%TB, etc.)
-- KHÔNG tự ý thêm chỉ báo khác ngoài kiến thức đã học
-- CÓ SỐ LIỆU cụ thể, trích dẫn quy tắc từ kiến thức
-- Luôn nhắc "Đây chỉ là tham khảo, nhà đầu tư tự chịu trách nhiệm quyết định"
-
-Hãy phân tích theo ĐÚNG phương pháp Chim Cút đã học!"""
-                                    
-                                    response = client.chat.completions.create(
-                                        model="gpt-4o-mini",
-                                        messages=[
-                                            {"role": "system", "content": system_prompt},
-                                            {"role": "user", "content": prompt}
-                                        ],
-                                        temperature=0.7,
-                                        max_tokens=2000
-                                    )
-                                    
-                                    # Hiển thị kết quả
-                                    ai_response = response.choices[0].message.content
-                                    st.markdown(ai_response)
-                                    
-                                    # Lưu vào lịch sử
-                                    st.session_state.messages.append({
-                                        "role": "assistant",
-                                        "content": ai_response,
-                                        "symbol": symbol
-                                    })
-                                    
-                                except Exception as e:
-                                    error_msg = f"❌ **Lỗi khi gọi OpenAI API:**\n\n```\n{str(e)}\n```\n\n"
-                                    error_msg += "**Có thể do:**\n"
-                                    error_msg += "- API key không đúng hoặc hết hạn\n"
-                                    error_msg += "- Không có kết nối internet\n"
-                                    error_msg += "- Tài khoản OpenAI hết credit\n\n"
-                                    error_msg += "💡 Vui lòng kiểm tra lại API key ở sidebar"
-                                    
-                                    st.error(error_msg)
-                                    
-                                    # Lưu error vào lịch sử
-                                    st.session_state.messages.append({
-                                        "role": "assistant",
-                                        "content": error_msg,
-                                        "symbol": symbol
-                                    })
-                    
-                    # Input từ user
-                    if prompt := st.chat_input("Hỏi AI về cổ phiếu này..."):
-                        # Hiển thị câu hỏi của user
-                        with st.chat_message("user"):
-                            st.markdown(prompt)
-                        
-                        st.session_state.messages.append({
-                            "role": "user",
-                            "content": prompt,
-                            "symbol": symbol
-                        })
-                        
-                        # Rerun để xử lý message mới
-                        st.rerun()
-                    
-                    # Các câu hỏi gợi ý
-                    st.markdown("---")
-                    st.markdown("**💡 Câu hỏi gợi ý:**")
-                    col1, col2 = st.columns(2)
-                    with col1:  
-                        if st.button(f"📊 Phân tích kỹ thuật {symbol}", use_container_width=True):
-                            st.rerun()
-                        if st.button(f"💰 Đánh giá định giá {symbol}", use_container_width=True):
-                            st.rerun()
-                    with col2:
-                        if st.button(f"⚠️ Rủi ro khi đầu tư {symbol}", use_container_width=True):
-                            st.rerun()
-                        if st.button(f"🎯 Mục tiêu giá {symbol}", use_container_width=True):
-                            st.rerun()
+                st.info("💡 **Phần AI đã được chuyển xuống cuối trang** (sau tất cả các tab).")
+                st.markdown("**Lý do kỹ thuật:** AI chat cần nằm ngoài tabs để hoạt động ổn định khi rerun.")
         
         st.success(f"✅ Đã tải xong dữ liệu cho {symbol}!")
         
@@ -464,47 +280,58 @@ Hãy phân tích theo ĐÚNG phương pháp Chim Cút đã học!"""
         st.error(f"❌ Lỗi: {str(e)}")
         st.info("Vui lòng kiểm tra lại mã chứng khoán hoặc kết nối internet.")
 
-# Phần AI Chat - hiển thị độc lập
+# ==================== PHẦN AI CHAT (NGOÀI TABS) ====================
+# Đặt ở đây để tránh bị mất khi rerun
 if st.session_state.current_symbol:
+    symbol = st.session_state.current_symbol
+    
     st.markdown("---")
-    st.header(f"🤖 AI Phân tích - {st.session_state.current_symbol}")
+    st.subheader(f"🤖 AI Phân tích cổ phiếu {symbol}")
     
     if not st.session_state.openai_api_key:
         st.warning("⚠️ Vui lòng nhập OpenAI API Key ở sidebar để sử dụng tính năng AI")
     else:
-        # Nút phân tích
-        col1, col2, col3 = st.columns([1, 1, 4])
-        with col1:
-            if st.button("🎯 PTKT Chim Cút", use_container_width=True, type="primary"):
-                auto_prompt = f"Phân tích kỹ thuật cổ phiếu {st.session_state.current_symbol} theo phương pháp Chim Cút. Hãy áp dụng CHÍNH XÁC các quy tắc về MA, ADX, Volume và đưa ra khuyến nghị cụ thể."
-                st.session_state.messages.append({
-                    "role": "user",
-                    "content": auto_prompt,
-                    "symbol": st.session_state.current_symbol
-                })
-                st.rerun()
+        # Kiểm tra xem có message đang chờ xử lý không
+        user_messages = [m for m in st.session_state.messages if m["symbol"] == symbol and m["role"] == "user"]
+        assistant_messages = [m for m in st.session_state.messages if m["symbol"] == symbol and m["role"] == "assistant"]
+        is_processing = len(user_messages) > len(assistant_messages)
         
-        with col2:
-            if st.button("🔄 Xóa lịch sử", use_container_width=True):
-                st.session_state.messages = [m for m in st.session_state.messages if m["symbol"] != st.session_state.current_symbol]
-                st.rerun()
+        # Chỉ hiển thị nút khi KHÔNG đang xử lý
+        if not is_processing:
+            # Nút phân tích
+            col1, col2 = st.columns([1, 1])
+            with col1:
+                if st.button("🎯 PTKT Chim Cút", use_container_width=True, type="primary", key="ptkt_button"):
+                    auto_prompt = f"Phân tích kỹ thuật cổ phiếu {symbol} theo phương pháp Chim Cút. Hãy áp dụng CHÍNH XÁC các quy tắc về MA, ADX, Volume và đưa ra khuyến nghị cụ thể."
+                    st.session_state.messages.append({
+                        "role": "user",
+                        "content": auto_prompt,
+                        "symbol": symbol
+                    })
+                    st.rerun()
+            
+            with col2:
+                if st.button("🔄 Xóa lịch sử", use_container_width=True, key="clear_button"):
+                    st.session_state.messages = [m for m in st.session_state.messages if m["symbol"] != symbol]
+                    st.rerun()
         
         # Hiển thị lịch sử chat
         for message in st.session_state.messages:
-            if message["symbol"] == st.session_state.current_symbol:
+            if message["symbol"] == symbol:
                 with st.chat_message(message["role"]):
                     st.markdown(message["content"])
         
-        # Input chat
-        if prompt := st.chat_input("Hỏi AI về cổ phiếu này..."):
-            st.session_state.messages.append({
-                "role": "user",
-                "content": prompt,
-                "symbol": st.session_state.current_symbol
-            })
-            st.rerun()
+        # Input chat (chỉ hiện khi không đang xử lý)
+        if not is_processing:
+            if prompt := st.chat_input("Hỏi AI về cổ phiếu này...", key="chat_input"):
+                st.session_state.messages.append({
+                    "role": "user",
+                    "content": prompt,
+                    "symbol": symbol
+                })
+                st.rerun()
 
-# Xử lý AI chat (chạy ngoài submit_button để xử lý rerun)
+# Xử lý AI response (chạy sau khi có user message)
 if st.session_state.current_symbol and st.session_state.openai_api_key:
     symbol = st.session_state.current_symbol
     price_data = st.session_state.price_data if st.session_state.price_data is not None else pd.DataFrame()
